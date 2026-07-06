@@ -1,0 +1,305 @@
+Disassembly of <code object compute_transfer_for_card at 0x000001FB86854800, file "main.py", line 739>:
+              0 COPY_FREE_VARS           4
+
+739           2 RESUME                   0
+
+741           4 NOP
+
+743           6 LOAD_DEREF              10 (curF)
+              8 LOAD_METHOD              0 (execute)
+             30 LOAD_CONST               1 ('SELECT card_type FROM local_card_types WHERE local_card_type = ? LIMIT 1')
+             32 LOAD_FAST                0 (local_card_value)
+             34 BUILD_TUPLE              1
+             36 PRECALL                  2
+             40 CALL                     2
+             50 POP_TOP
+
+744          52 LOAD_DEREF              10 (curF)
+             54 LOAD_METHOD              1 (fetchone)
+             76 PRECALL                  0
+             80 CALL                     0
+             90 STORE_FAST               2 (rr)
+
+745          92 LOAD_FAST                2 (rr)
+             94 POP_JUMP_FORWARD_IF_FALSE    17 (to 130)
+             96 LOAD_FAST                2 (rr)
+             98 LOAD_CONST               2 (0)
+            100 BINARY_SUBSCR
+            110 POP_JUMP_FORWARD_IF_NONE     9 (to 130)
+
+746         112 LOAD_FAST                2 (rr)
+            114 LOAD_CONST               2 (0)
+            116 BINARY_SUBSCR
+            126 STORE_FAST               3 (card_type_id)
+            128 JUMP_FORWARD            71 (to 272)
+
+748     >>  130 LOAD_DEREF              10 (curF)
+            132 LOAD_METHOD              0 (execute)
+            154 LOAD_CONST               4 ('SELECT card_type_id FROM local_card_types WHERE local_card_type = ? LIMIT 1')
+            156 LOAD_FAST                0 (local_card_value)
+            158 BUILD_TUPLE              1
+            160 PRECALL                  2
+            164 CALL                     2
+            174 POP_TOP
+
+749         176 LOAD_DEREF              10 (curF)
+            178 LOAD_METHOD              1 (fetchone)
+            200 PRECALL                  0
+            204 CALL                     0
+            214 STORE_FAST               4 (rr2)
+
+750         216 LOAD_FAST                4 (rr2)
+            218 POP_JUMP_FORWARD_IF_FALSE    17 (to 254)
+            220 LOAD_FAST                4 (rr2)
+            222 LOAD_CONST               2 (0)
+            224 BINARY_SUBSCR
+            234 POP_JUMP_FORWARD_IF_NONE     9 (to 254)
+
+751         236 LOAD_FAST                4 (rr2)
+            238 LOAD_CONST               2 (0)
+            240 BINARY_SUBSCR
+            250 STORE_FAST               3 (card_type_id)
+            252 JUMP_FORWARD             9 (to 272)
+
+753     >>  254 LOAD_CONST               5 (False)
+            256 LOAD_FAST                1 (display_text)
+            258 JUMP_IF_TRUE_OR_POP      1 (to 262)
+            260 LOAD_FAST                0 (local_card_value)
+        >>  262 FORMAT_VALUE             0
+            264 LOAD_CONST               6 (': local_card_types eşleme bulunamadı')
+            266 BUILD_STRING             2
+            268 BUILD_TUPLE              2
+            270 RETURN_VALUE
+
+755     >>  272 BUILD_LIST               0
+            274 STORE_FAST               5 (results)
+
+758         276 LOAD_DEREF              10 (curF)
+            278 LOAD_METHOD              0 (execute)
+            300 LOAD_CONST               7 ('SELECT percent FROM transfer_discounts WHERE time_zone_id = ? AND card_type_id = ? LIMIT 1')
+
+759         302 LOAD_DEREF              11 (percent_val)
+            304 LOAD_FAST                3 (card_type_id)
+            306 BUILD_TUPLE              2
+
+758         308 PRECALL                  2
+            312 CALL                     2
+            322 POP_TOP
+
+760         324 LOAD_DEREF              10 (curF)
+            326 LOAD_METHOD              1 (fetchone)
+            348 PRECALL                  0
+            352 CALL                     0
+            362 STORE_FAST               2 (rr)
+
+761         364 LOAD_FAST                2 (rr)
+            366 POP_JUMP_FORWARD_IF_FALSE     8 (to 384)
+            368 LOAD_FAST                2 (rr)
+            370 LOAD_CONST               2 (0)
+            372 BINARY_SUBSCR
+            382 POP_JUMP_FORWARD_IF_NOT_NONE    12 (to 408)
+
+762     >>  384 LOAD_CONST               5 (False)
+            386 LOAD_FAST                1 (display_text)
+            388 JUMP_IF_TRUE_OR_POP      1 (to 392)
+            390 LOAD_FAST                0 (local_card_value)
+        >>  392 FORMAT_VALUE             0
+            394 LOAD_CONST               8 (': transfer_discounts içinde ')
+            396 LOAD_DEREF              12 (selected_order)
+            398 FORMAT_VALUE             0
+            400 LOAD_CONST               9 ('. aktarma için percent bulunamadı')
+            402 BUILD_STRING             4
+            404 BUILD_TUPLE              2
+            406 RETURN_VALUE
+
+764     >>  408 LOAD_FAST                2 (rr)
+            410 LOAD_CONST               2 (0)
+            412 BINARY_SUBSCR
+            422 STORE_FAST               6 (percent_discount)
+
+765         424 LOAD_DEREF              13 (self)
+            426 LOAD_METHOD              2 (log_msg)
+            448 LOAD_FAST                1 (display_text)
+            450 JUMP_IF_TRUE_OR_POP      1 (to 454)
+            452 LOAD_FAST                0 (local_card_value)
+        >>  454 FORMAT_VALUE             0
+            456 LOAD_CONST              10 (' - ')
+            458 LOAD_DEREF              12 (selected_order)
+            460 FORMAT_VALUE             0
+            462 LOAD_CONST              11 ('. aktarma: transfer_discounts.percent=')
+            464 LOAD_FAST                6 (percent_discount)
+            466 FORMAT_VALUE             0
+            468 BUILD_STRING             5
+            470 PRECALL                  1
+            474 CALL                     1
+            484 POP_TOP
+
+768         486 LOAD_DEREF              10 (curF)
+            488 LOAD_METHOD              0 (execute)
+            510 LOAD_CONST              12 ('SELECT fare FROM fares WHERE fare_id = ? LIMIT 1')
+            512 LOAD_FAST                6 (percent_discount)
+            514 BUILD_TUPLE              1
+            516 PRECALL                  2
+            520 CALL                     2
+            530 POP_TOP
+
+769         532 LOAD_DEREF              10 (curF)
+            534 LOAD_METHOD              1 (fetchone)
+            556 PRECALL                  0
+            560 CALL                     0
+            570 STORE_FAST               2 (rr)
+
+770         572 LOAD_FAST                2 (rr)
+            574 POP_JUMP_FORWARD_IF_FALSE     8 (to 592)
+            576 LOAD_FAST                2 (rr)
+            578 LOAD_CONST               2 (0)
+            580 BINARY_SUBSCR
+            590 POP_JUMP_FORWARD_IF_NOT_NONE    65 (to 722)
+
+771     >>  592 LOAD_DEREF              10 (curF)
+            594 LOAD_METHOD              0 (execute)
+            616 LOAD_CONST              13 ('SELECT amount FROM fares WHERE fare_id = ? LIMIT 1')
+            618 LOAD_FAST                6 (percent_discount)
+            620 BUILD_TUPLE              1
+            622 PRECALL                  2
+            626 CALL                     2
+            636 POP_TOP
+
+772         638 LOAD_DEREF              10 (curF)
+            640 LOAD_METHOD              1 (fetchone)
+            662 PRECALL                  0
+            666 CALL                     0
+            676 STORE_FAST               2 (rr)
+
+773         678 LOAD_FAST                2 (rr)
+            680 POP_JUMP_FORWARD_IF_FALSE     8 (to 698)
+            682 LOAD_FAST                2 (rr)
+            684 LOAD_CONST               2 (0)
+            686 BINARY_SUBSCR
+            696 POP_JUMP_FORWARD_IF_NOT_NONE    12 (to 722)
+
+774     >>  698 LOAD_CONST               5 (False)
+            700 LOAD_FAST                1 (display_text)
+            702 JUMP_IF_TRUE_OR_POP      1 (to 706)
+            704 LOAD_FAST                0 (local_card_value)
+        >>  706 FORMAT_VALUE             0
+            708 LOAD_CONST              14 (': fares tablosunda ')
+            710 LOAD_DEREF              12 (selected_order)
+            712 FORMAT_VALUE             0
+            714 LOAD_CONST              15 ('. aktarma için fare bulunamadı')
+            716 BUILD_STRING             4
+            718 BUILD_TUPLE              2
+            720 RETURN_VALUE
+
+776     >>  722 NOP
+
+777         724 LOAD_FAST                2 (rr)
+            726 LOAD_CONST               2 (0)
+            728 BINARY_SUBSCR
+            738 POP_JUMP_FORWARD_IF_NONE    21 (to 782)
+            740 LOAD_GLOBAL              7 (NULL + int)
+            752 LOAD_FAST                2 (rr)
+            754 LOAD_CONST               2 (0)
+            756 BINARY_SUBSCR
+            766 PRECALL                  1
+            770 CALL                     1
+            780 JUMP_FORWARD             1 (to 784)
+        >>  782 LOAD_CONST               2 (0)
+        >>  784 STORE_FAST               7 (fare_kurus)
+            786 JUMP_FORWARD            47 (to 882)
+        >>  788 PUSH_EXC_INFO
+
+778         790 LOAD_GLOBAL              8 (Exception)
+            802 CHECK_EXC_MATCH
+            804 POP_JUMP_FORWARD_IF_FALSE    34 (to 874)
+            806 POP_TOP
+
+779         808 LOAD_FAST                2 (rr)
+            810 LOAD_CONST               2 (0)
+            812 BINARY_SUBSCR
+            822 POP_JUMP_FORWARD_IF_NONE    21 (to 866)
+            824 LOAD_GLOBAL             11 (NULL + float)
+            836 LOAD_FAST                2 (rr)
+            838 LOAD_CONST               2 (0)
+            840 BINARY_SUBSCR
+            850 PRECALL                  1
+            854 CALL                     1
+            864 JUMP_FORWARD             1 (to 868)
+        >>  866 LOAD_CONST               2 (0)
+        >>  868 STORE_FAST               7 (fare_kurus)
+            870 POP_EXCEPT
+            872 JUMP_FORWARD             4 (to 882)
+
+778     >>  874 RERAISE                  0
+        >>  876 COPY                     3
+            878 POP_EXCEPT
+            880 RERAISE                  1
+
+780     >>  882 LOAD_FAST                7 (fare_kurus)
+            884 LOAD_CONST              16 (100.0)
+            886 BINARY_OP               11 (/)
+            890 STORE_FAST               8 (fare_tl)
+
+782         892 LOAD_CONST              17 (True)
+            894 LOAD_FAST                1 (display_text)
+            896 JUMP_IF_TRUE_OR_POP      1 (to 900)
+            898 LOAD_FAST                0 (local_card_value)
+        >>  900 FORMAT_VALUE             0
+            902 LOAD_CONST              18 (' için ')
+            904 LOAD_DEREF              12 (selected_order)
+            906 FORMAT_VALUE             0
+            908 LOAD_CONST              19 ('. aktarma ')
+            910 LOAD_FAST                8 (fare_tl)
+            912 LOAD_CONST              20 ('.2f')
+            914 FORMAT_VALUE             4 (with format)
+            916 LOAD_CONST              21 (' TL')
+            918 BUILD_STRING             6
+            920 BUILD_TUPLE              2
+            922 RETURN_VALUE
+        >>  924 PUSH_EXC_INFO
+
+784         926 LOAD_GLOBAL              8 (Exception)
+            938 CHECK_EXC_MATCH
+            940 POP_JUMP_FORWARD_IF_FALSE    21 (to 984)
+            942 STORE_FAST               9 (e)
+
+785         944 LOAD_CONST               5 (False)
+            946 LOAD_FAST                1 (display_text)
+            948 JUMP_IF_TRUE_OR_POP      1 (to 952)
+            950 LOAD_FAST                0 (local_card_value)
+        >>  952 FORMAT_VALUE             0
+            954 LOAD_CONST              22 (': hata - ')
+            956 LOAD_FAST                9 (e)
+            958 FORMAT_VALUE             0
+            960 BUILD_STRING             3
+            962 BUILD_TUPLE              2
+            964 SWAP                     2
+            966 POP_EXCEPT
+            968 LOAD_CONST               3 (None)
+            970 STORE_FAST               9 (e)
+            972 DELETE_FAST              9 (e)
+            974 RETURN_VALUE
+        >>  976 LOAD_CONST               3 (None)
+            978 STORE_FAST               9 (e)
+            980 DELETE_FAST              9 (e)
+            982 RERAISE                  1
+
+784     >>  984 RERAISE                  0
+        >>  986 COPY                     3
+            988 POP_EXCEPT
+            990 RERAISE                  1
+ExceptionTable:
+  6 to 268 -> 924 [0]
+  272 to 404 -> 924 [0]
+  408 to 718 -> 924 [0]
+  724 to 784 -> 788 [0]
+  786 to 786 -> 924 [0]
+  788 to 868 -> 876 [1] lasti
+  870 to 872 -> 924 [0]
+  874 to 874 -> 876 [1] lasti
+  876 to 920 -> 924 [0]
+  924 to 942 -> 986 [1] lasti
+  944 to 962 -> 976 [1] lasti
+  964 to 964 -> 986 [1] lasti
+  976 to 984 -> 986 [1] lasti
+

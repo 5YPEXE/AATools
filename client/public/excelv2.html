@@ -1,0 +1,2539 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AATools ExcelLens — Akıllı Excel Analiz Aracı</title>
+  <meta name="description" content="AATools ExcelLens ile excel dosyalarını karşılaştırın, analiz edin ve görselleştirin. Gelişmiş filtreler, diff, pivot, grafik." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+/* ══════════════════════════════════════════════════
+   RESET
+══════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ══════════════════════════════════════════════════
+   LIGHT THEME
+══════════════════════════════════════════════════ */
+:root {
+  --bg:        #F8FAFC;
+  --bg-2:      #FFFFFF;
+  --bg-3:      #F1F5F9;
+  --bg-4:      #E2E8F0;
+  --fg:        #0F172A;
+  --fg-2:      #334155;
+  --fg-3:      #4f7cff;
+  --fg-4:      #94A3B8;
+
+  --accent:    #4f7cff;
+  --accent-bg: rgba(79, 124, 255, 0.08);
+  --yellow:    #f5a623;
+  --yellow-bg: rgba(245, 166, 35, 0.1);
+
+  --green:     #00d4aa;
+  --green-bg:  rgba(0, 212, 170, 0.08);
+  --green-2:   #bbf7d0;
+  --red:       #ff6b6b;
+  --red-bg:    rgba(255, 107, 107, 0.08);
+  --red-2:     #fecaca;
+  --amber:     #f5a623;
+  --amber-bg:  rgba(245, 166, 35, 0.08);
+  --amber-2:   #fef3c7;
+  --blue:      #3b82f6;
+  --blue-bg:   #eff6ff;
+  --purple:    #a855f7;
+  --purple-bg: rgba(168, 85, 247, 0.08);
+  --purple-2:  #e9d5ff;
+
+  --border-c:  rgba(79, 124, 255, 0.12);
+  --border:    1px solid var(--border-c);
+  --border-sm: 1px solid var(--border-c);
+  --shadow:    0 2px 8px rgba(0,0,0,0.06);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.1);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
+
+  --header-bg: #0f1629;
+  --header-fg: #e8edf8;
+
+  --font: 'Inter', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+
+  --tr: 0.2s ease;
+  --theme-tr: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* ══════════════════════════════════════════════════
+   DARK THEME — Neo-Brut Dark (krem border)
+══════════════════════════════════════════════════ */
+[data-theme="dark"] {
+  --bg:        #0a0e1a;
+  --bg-2:      #0f1629;
+  --bg-3:      #141d35;
+  --bg-4:      #1a2540;
+  --fg:        #e8edf8;
+  --fg-2:      #8fa3c8;
+  --fg-3:      #7aa3ff;
+  --fg-4:      #4d6080;
+
+  --accent:    #4f7cff;
+  --accent-bg: rgba(79, 124, 255, 0.15);
+  --yellow:    #f5a623;
+  --yellow-bg: rgba(245, 166, 35, 0.15);
+
+  --green:     #00d4aa;
+  --green-bg:  rgba(0, 212, 170, 0.12);
+  --green-2:   #064e3b;
+  --red:       #ff6b6b;
+  --red-bg:    rgba(255, 107, 107, 0.12);
+  --red-2:     #7f1d1d;
+  --amber:     #f5a623;
+  --amber-bg:  rgba(245, 166, 35, 0.12);
+  --amber-2:   #78350f;
+  --blue:      #60a5fa;
+  --blue-bg:   #172554;
+  --purple:    #a855f7;
+  --purple-bg: rgba(168, 85, 247, 0.12);
+  --purple-2:  #581c87;
+
+  --border-c:  rgba(99, 130, 255, 0.15);
+  --border:    1px solid var(--border-c);
+  --border-sm: 1px solid var(--border-c);
+  --shadow:    0 4px 12px rgba(0,0,0,0.5);
+  --shadow-lg: 0 12px 36px rgba(0,0,0,0.6);
+  --shadow-sm: 0 2px 6px rgba(0,0,0,0.4);
+
+  --header-bg: #090d18;
+  --header-fg: #e8edf8;
+}
+
+/* ══════════════════════════════════════════════════
+   THEME TRANSITIONS
+══════════════════════════════════════════════════ */
+body, header, .sidebar, .sidebar-section, .sidebar-section-header,
+.sidebar-section-body, .tab-bar, .tab-btn, .toolbar, .stat-card,
+.stat-inner, .data-table-wrap, .data-table thead, .data-table td,
+.compare-file-card, .drop-zone, .search-box, .row-count, .toast,
+.loading-box, .cell-tooltip, .btn, .filter-input, .col-search,
+.sheet-select, .key-select, .analiz-panel, .chart-box, .adv-op,
+.detail-panel, .pivot-table td, .pivot-table th, .export-dropdown,
+.kbd-modal, .schema-badge, .stat-grid-card, .heatmap-table td {
+  transition: var(--theme-tr);
+}
+
+/* ══════════════════════════════════════════════════
+   SCROLLBAR
+══════════════════════════════════════════════════ */
+::-webkit-scrollbar { width: 7px; height: 7px; }
+::-webkit-scrollbar-track { background: var(--bg-2); }
+::-webkit-scrollbar-thumb { background: var(--fg); }
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+/* ══════════════════════════════════════════════════
+   LAYOUT
+══════════════════════════════════════════════════ */
+html { scroll-behavior: smooth; }
+body { font-family: var(--font); background: var(--bg); color: var(--fg); min-height: 100vh; overflow-x: hidden; }
+.app-wrapper { display: flex; flex-direction: column; min-height: 100vh; }
+
+/* ══════════════════════════════════════════════════
+   HEADER
+══════════════════════════════════════════════════ */
+header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 28px; height: 54px;
+  background: var(--header-bg); color: var(--header-fg);
+  position: sticky; top: 0; z-index: 200;
+  border-bottom: var(--border);
+}
+.logo { display: flex; align-items: center; gap: 12px; }
+.logo-mark { background: var(--accent); color: #fff; font-family: var(--mono); font-size: 12px; font-weight: 700; padding: 3px 9px; letter-spacing: 1px; }
+.logo-text { font-size: 16px; font-weight: 700; color: var(--header-fg); }
+.logo-text em { font-style: normal; color: var(--yellow); }
+.logo-sep { width: 1px; height: 18px; background: rgba(255,255,255,0.2); }
+.header-right { display: flex; gap: 6px; align-items: center; }
+.h-sep { width: 1px; height: 20px; background: rgba(255,255,255,0.18); }
+
+/* Header buttons */
+.hbtn {
+  display: flex; align-items: center; gap: 5px;
+  background: none; border: 1.5px solid rgba(255,255,255,0.22);
+  color: var(--header-fg); font-family: var(--mono); font-size: 10px; font-weight: 700;
+  padding: 4px 11px; cursor: pointer; letter-spacing: 1px; text-transform: uppercase;
+  transition: all var(--tr);
+}
+.hbtn:hover { border-color: var(--yellow); color: var(--yellow); }
+.hbtn.icon-only { padding: 4px 8px; font-size: 14px; }
+[data-theme="dark"] .hbtn { border-color: rgba(200,197,190,0.3); }
+
+/* Theme toggle */
+#themeIcon { transition: transform 0.35s ease; }
+
+/* ══════════════════════════════════════════════════
+   TABS
+══════════════════════════════════════════════════ */
+.tab-bar {
+  display: flex; align-items: flex-end;
+  padding: 0 28px;
+  background: var(--bg-2);
+  border-bottom: var(--border);
+}
+.tab-btn {
+  display: flex; align-items: center; gap: 7px;
+  padding: 12px 20px;
+  border: var(--border); border-bottom: none;
+  background: var(--bg-3); color: var(--fg-3);
+  font-family: var(--font); font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: all var(--tr);
+  position: relative; top: 2px; margin-right: 4px;
+}
+.tab-btn:hover { background: var(--bg-2); color: var(--fg); }
+.tab-btn.active {
+  background: var(--bg); color: var(--fg);
+  border-bottom: 2px solid var(--bg);
+  z-index: 1;
+}
+.tab-btn.active::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: var(--accent);
+}
+.tab-count {
+  background: var(--accent); color: #fff;
+  font-family: var(--mono); font-size: 10px; font-weight: 700;
+  padding: 1px 5px; display: none;
+}
+.tab-count.visible { display: inline; }
+
+/* ══════════════════════════════════════════════════
+   MAIN
+══════════════════════════════════════════════════ */
+.main-content { display: flex; flex: 1; min-height: 0; }
+
+/* ══════════════════════════════════════════════════
+   SIDEBAR
+══════════════════════════════════════════════════ */
+.sidebar {
+  width: 280px; min-width: 260px;
+  background: var(--bg-2); border-right: var(--border);
+  padding: 14px; display: flex; flex-direction: column; gap: 10px;
+  overflow-y: auto; max-height: calc(100vh - 104px);
+}
+.sidebar-section { border: var(--border); background: var(--bg); box-shadow: var(--shadow-sm); }
+.sidebar-section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 12px; background: var(--fg); color: var(--bg);
+  cursor: pointer; user-select: none; transition: background var(--tr);
+}
+.sidebar-section-header:hover { background: var(--fg-2); }
+/* Special colored headers */
+.sidebar-section-header.green { background: #1a6b4a; }
+.sidebar-section-header.green:hover { background: #145839; }
+.sidebar-section-header.blue  { background: #1e3a8a; }
+.sidebar-section-header.blue:hover  { background: #172e70; }
+[data-theme="dark"] .sidebar-section-header.green { background: #0a3322; }
+[data-theme="dark"] .sidebar-section-header.blue  { background: #0a1848; }
+
+.sidebar-section-title { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; font-family: var(--mono); }
+.sidebar-section-body { padding: 11px; }
+.section-toggle { font-size: 10px; transition: transform var(--tr); }
+.section-toggle.open { transform: rotate(180deg); }
+
+.sidebar-label { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--fg-3); font-family: var(--mono); margin-bottom: 5px; }
+
+/* ══════════════════════════════════════════════════
+   DROP ZONE
+══════════════════════════════════════════════════ */
+.drop-zone {
+  border: var(--border); border-style: dashed;
+  padding: 20px 12px; text-align: center; cursor: pointer;
+  position: relative; background: var(--bg-2); transition: all var(--tr);
+}
+.drop-zone:hover, .drop-zone.dragover { background: var(--accent-bg); border-color: var(--accent); border-style: solid; box-shadow: var(--shadow); }
+.drop-zone.has-file { background: var(--green-bg); border-color: var(--green); border-style: solid; box-shadow: var(--shadow); }
+.drop-zone input[type="file"] { display: none; }
+.drop-icon { font-size: 26px; margin-bottom: 6px; line-height: 1; }
+.drop-title { font-size: 12px; font-weight: 700; color: var(--fg); margin-bottom: 2px; }
+.drop-sub { font-size: 10px; color: var(--fg-3); font-family: var(--mono); }
+.drop-file-name { font-size: 10px; font-weight: 700; color: var(--green); margin-top: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: var(--mono); }
+.drop-badge { position: absolute; top: -1px; right: -1px; background: var(--accent); color: #fff; font-family: var(--mono); font-size: 10px; font-weight: 700; padding: 2px 8px; }
+.drop-badge.b2 { background: var(--blue); }
+
+.sheet-select, .key-select {
+  width: 100%; padding: 6px 8px;
+  background: var(--bg); border: var(--border-sm);
+  color: var(--fg); font-family: var(--mono); font-size: 11px;
+  cursor: pointer; margin-top: 7px;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%230F0F0D'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 8px center;
+}
+[data-theme="dark"] .sheet-select,
+[data-theme="dark"] .key-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23E8E5DE'/%3E%3C/svg%3E");
+}
+.sheet-select:focus, .key-select:focus { outline: 2px solid var(--accent); outline-offset: 0; }
+
+/* ══════════════════════════════════════════════════
+   COLUMN PANEL
+══════════════════════════════════════════════════ */
+.col-search {
+  width: 100%; padding: 6px 8px;
+  background: var(--bg-2); border: var(--border-sm);
+  color: var(--fg); font-family: var(--mono); font-size: 11px;
+  margin-bottom: 7px;
+}
+.col-search:focus { outline: 2px solid var(--accent); outline-offset: 0; }
+.col-search::placeholder { color: var(--fg-4); }
+.col-actions { display: flex; gap: 5px; margin-bottom: 7px; }
+.col-action-btn {
+  flex: 1; padding: 4px;
+  font-size: 10px; font-weight: 700; font-family: var(--font);
+  border: var(--border-sm); background: var(--bg-2); color: var(--fg);
+  cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; transition: all var(--tr);
+}
+.col-action-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+.col-list { display: flex; flex-direction: column; gap: 2px; max-height: 190px; overflow-y: auto; }
+.col-item {
+  display: flex; align-items: center; gap: 7px; padding: 4px 6px;
+  cursor: pointer; transition: background var(--tr); font-size: 11px;
+  border: 1.5px solid transparent;
+}
+.col-item:hover { background: var(--bg-2); border-color: var(--fg); }
+.col-item input[type="checkbox"] { width: 13px; height: 13px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0; }
+.col-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--mono); font-size: 10px; }
+.col-type {
+  font-size: 8px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 1px 4px;
+  background: var(--blue-bg); color: var(--blue); border: 1px solid var(--blue);
+  font-family: var(--mono); flex-shrink: 0;
+}
+.col-type.num  { background: var(--green-bg); color: var(--green); border-color: var(--green); }
+.col-type.date { background: var(--purple-bg); color: var(--purple); border-color: var(--purple); }
+
+/* ══════════════════════════════════════════════════
+   ADVANCED FILTERS
+══════════════════════════════════════════════════ */
+.filter-list { display: flex; flex-direction: column; gap: 7px; }
+.filter-item { display: flex; flex-direction: column; gap: 3px; }
+.filter-label { font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--fg-3); font-family: var(--mono); }
+.filter-row { display: flex; gap: 4px; }
+.adv-op {
+  padding: 5px 4px; background: var(--bg-2); border: var(--border-sm);
+  color: var(--fg); font-family: var(--mono); font-size: 10px; cursor: pointer;
+  width: 72px; flex-shrink: 0;
+  appearance: none; background-image: none; text-align: center;
+}
+.adv-op:focus { outline: 2px solid var(--accent); outline-offset: 0; }
+.filter-input {
+  flex: 1; padding: 5px 7px; background: var(--bg-2); border: var(--border-sm);
+  color: var(--fg); font-family: var(--mono); font-size: 11px;
+}
+.filter-input:focus { outline: 2px solid var(--accent); outline-offset: 0; }
+.filter-input::placeholder { color: var(--fg-4); }
+.filter-clear-btn {
+  width: 100%; padding: 6px;
+  font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+  font-family: var(--font); border: var(--border-sm); border-color: var(--red);
+  background: var(--red-bg); color: var(--red); cursor: pointer; transition: all var(--tr); margin-top: 5px;
+}
+.filter-clear-btn:hover { background: var(--red); color: #fff; }
+
+/* ══════════════════════════════════════════════════
+   TOOLS PANEL (sidebar)
+══════════════════════════════════════════════════ */
+.tool-btn {
+  width: 100%; padding: 7px 10px; text-align: left;
+  font-size: 11px; font-weight: 700; font-family: var(--font);
+  border: var(--border-sm); background: var(--bg-2); color: var(--fg);
+  cursor: pointer; transition: all var(--tr); margin-bottom: 5px;
+  display: flex; align-items: center; gap: 7px;
+}
+.tool-btn:hover { background: var(--fg); color: var(--bg); box-shadow: var(--shadow-sm); }
+.tool-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.tool-sep { height: 1.5px; background: var(--bg-3); margin: 6px 0; }
+.dup-cols-list { display: flex; flex-direction: column; gap: 3px; margin-top: 6px; max-height: 120px; overflow-y: auto; }
+.dup-col-item { display: flex; align-items: center; gap: 6px; font-size: 10px; font-family: var(--mono); padding: 2px 0; }
+.dup-col-item input { width: 12px; height: 12px; accent-color: var(--purple); }
+
+/* ══════════════════════════════════════════════════
+   BUTTONS
+══════════════════════════════════════════════════ */
+.btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 7px 14px; font-family: var(--font); font-size: 12px; font-weight: 700;
+  border: var(--border-sm); cursor: pointer; transition: all var(--tr);
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: var(--shadow); }
+.btn-primary:hover { transform: translate(-1px,-1px); box-shadow: var(--shadow-lg); }
+.btn-primary:active { transform: translate(2px,2px); box-shadow: none; }
+.btn-secondary { background: var(--bg); color: var(--fg); border-color: var(--border-c); box-shadow: var(--shadow-sm); }
+.btn-secondary:hover { background: var(--fg); color: var(--bg); }
+.btn-success { background: var(--green); color: #fff; border-color: var(--green); box-shadow: var(--shadow); }
+.btn-success:hover { transform: translate(-1px,-1px); box-shadow: var(--shadow-lg); }
+.btn-success:active { transform: translate(2px,2px); box-shadow: none; }
+.btn-ghost { background: none; color: var(--fg-3); border: var(--border-sm); }
+.btn-ghost:hover { background: var(--bg-2); color: var(--fg); }
+.btn-sm { padding: 4px 10px; font-size: 10px; }
+.btn-full { width: 100%; justify-content: center; }
+
+/* Export dropdown */
+.export-wrap { position: relative; display: inline-flex; }
+.export-dropdown {
+  position: absolute; top: calc(100% + 4px); right: 0;
+  background: var(--bg); border: var(--border); box-shadow: var(--shadow-lg);
+  min-width: 140px; z-index: 300; display: none;
+}
+.export-dropdown.open { display: block; }
+.export-opt {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px; cursor: pointer; font-size: 12px; font-weight: 600;
+  border-bottom: 1px solid var(--bg-3); transition: background var(--tr);
+}
+.export-opt:last-child { border-bottom: none; }
+.export-opt:hover { background: var(--accent); color: #fff; }
+
+/* ══════════════════════════════════════════════════
+   CONTENT AREA
+══════════════════════════════════════════════════ */
+.content-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+.tab-panel { display: none; flex: 1; flex-direction: column; overflow: hidden; }
+.tab-panel.active { display: flex; }
+
+/* ══════════════════════════════════════════════════
+   TOOLBAR
+══════════════════════════════════════════════════ */
+.toolbar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 18px; background: var(--bg-2); border-bottom: var(--border);
+  flex-wrap: wrap; flex-shrink: 0;
+}
+.toolbar-sep { width: 2px; height: 20px; background: var(--border-c); }
+.toolbar-label { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--fg-3); font-family: var(--mono); }
+.search-box {
+  display: flex; align-items: center;
+  background: var(--bg); border: var(--border-sm);
+  padding: 4px 9px; gap: 6px; box-shadow: var(--shadow-sm);
+}
+.search-box:focus-within { outline: 2px solid var(--accent); outline-offset: 0; box-shadow: var(--shadow); }
+.search-box input { background: none; border: none; outline: none; color: var(--fg); font-family: var(--mono); font-size: 12px; width: 190px; }
+.search-box input::placeholder { color: var(--fg-4); }
+.search-icon { color: var(--fg-3); font-size: 12px; }
+.row-count { font-size: 11px; color: var(--fg-3); padding: 4px 9px; background: var(--bg); border: var(--border-sm); font-family: var(--mono); }
+.row-count strong { color: var(--fg); }
+
+/* Fullscreen mode */
+.content-area:fullscreen { background: var(--bg); }
+.content-area:-webkit-full-screen { background: var(--bg); }
+
+/* ══════════════════════════════════════════════════
+   TABLE
+══════════════════════════════════════════════════ */
+.table-container { flex: 1; overflow: auto; padding: 18px; }
+.data-table-wrap { border: var(--border); box-shadow: var(--shadow-lg); overflow: hidden; }
+.data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.data-table thead { position: sticky; top: 0; z-index: 10; background: var(--fg); }
+.data-table thead th {
+  padding: 9px 13px; text-align: left;
+  font-size: 9px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--bg-3); border-right: 1px solid rgba(255,255,255,0.1);
+  white-space: nowrap; cursor: pointer; transition: background var(--tr); user-select: none;
+  font-family: var(--mono);
+}
+.data-table thead th:hover { background: var(--fg-2); color: var(--yellow); }
+.data-table thead th .th-inner { display: flex; align-items: center; gap: 5px; }
+.sort-icon { opacity: 0.35; font-size: 9px; }
+.sort-icon.asc { opacity: 1; color: var(--yellow); }
+.sort-icon.desc { opacity: 1; color: var(--accent); }
+
+/* Rename input */
+.th-rename {
+  background: var(--yellow); color: var(--fg); border: none; outline: none;
+  font-family: var(--mono); font-size: 9px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+  width: 100%; min-width: 60px; padding: 0; text-align: left;
+}
+
+.data-table tbody tr { border-bottom: 1.5px solid var(--bg-3); transition: background var(--tr); cursor: pointer; }
+.data-table tbody tr:last-child { border-bottom: none; }
+.data-table tbody tr:hover { background: var(--accent-bg) !important; }
+.data-table tbody tr:nth-child(even) { background: var(--bg-2); }
+.data-table tbody tr.row-selected { background: var(--yellow-bg) !important; border-left: 4px solid var(--yellow); }
+
+.data-table td { padding: 8px 13px; color: var(--fg); white-space: nowrap; max-width: 240px; overflow: hidden; text-overflow: ellipsis; border-right: 1px solid var(--bg-3); }
+.data-table td:first-child { color: var(--fg-4); font-family: var(--mono); font-size: 10px; background: var(--bg-2); border-right: var(--border-sm); }
+
+/* Duplicate badge */
+.dup-badge { background: var(--purple); color: #fff; font-family: var(--mono); font-size: 8px; font-weight: 700; padding: 1px 4px; letter-spacing: 0.5px; }
+
+/* Schema indicators */
+.schema-email   { color: var(--blue); }
+.schema-url     { color: var(--blue); text-decoration: underline dotted; }
+.schema-date    { color: var(--purple); }
+.schema-currency{ color: var(--green); font-weight: 600; }
+.schema-phone   { color: var(--amber); }
+.schema-boolean { color: var(--accent); font-weight: 700; text-transform: uppercase; }
+
+/* ══════════════════════════════════════════════════
+   DIFF ROWS
+══════════════════════════════════════════════════ */
+.data-table tbody tr.diff-added   { background: var(--green-bg) !important; }
+.data-table tbody tr.diff-removed { background: var(--red-bg)   !important; }
+.data-table tbody tr.diff-changed { background: var(--amber-bg) !important; }
+.data-table tbody tr.diff-added   td:first-child { color: var(--green) !important; }
+.data-table tbody tr.diff-removed td:first-child { color: var(--red)   !important; }
+
+.diff-added-cell   { background: var(--green-2) !important; color: var(--green) !important; font-weight: 600; border-left: 3px solid var(--green) !important; }
+.diff-removed-cell { background: var(--red-2)   !important; color: var(--red)   !important; text-decoration: line-through; border-left: 3px solid var(--red) !important; }
+.diff-changed-cell { background: var(--amber-2) !important; color: var(--amber) !important; font-weight: 600; border-left: 3px solid var(--amber) !important; }
+.diff-fuzzy-cell   { background: var(--purple-2)!important; color: var(--purple)!important; border-left: 3px solid var(--purple) !important; }
+
+.diff-row-badge { display: inline-flex; align-items: center; gap: 2px; font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 2px 6px; font-family: var(--mono); }
+.badge-added   { background: var(--green); color: #fff; }
+.badge-removed { background: var(--red);   color: #fff; }
+.badge-changed { background: var(--amber); color: #fff; }
+.badge-fuzzy   { background: var(--purple);color: #fff; }
+.badge-same    { background: var(--bg-3); color: var(--fg-3); border: 1px solid var(--fg-3); }
+
+/* ══════════════════════════════════════════════════
+   STATS BAR (compare)
+══════════════════════════════════════════════════ */
+.stats-bar { display: flex; gap: 10px; padding: 12px 18px; background: var(--bg-2); border-bottom: var(--border); flex-wrap: wrap; flex-shrink: 0; }
+.stat-card { display: flex; align-items: stretch; border: var(--border); box-shadow: var(--shadow-sm); flex: 1; min-width: 110px; overflow: hidden; transition: all var(--tr); }
+.stat-card:hover { transform: translate(-1px,-1px); box-shadow: var(--shadow); }
+.stat-stripe { width: 5px; flex-shrink: 0; }
+.stat-inner { display: flex; align-items: center; gap: 8px; padding: 9px 12px; background: var(--bg); flex: 1; }
+.stat-body { display: flex; flex-direction: column; }
+.stat-value { font-size: 20px; font-weight: 700; line-height: 1; font-family: var(--mono); }
+.stat-label { font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--fg-3); margin-top: 2px; font-family: var(--mono); }
+.stat-total .stat-stripe { background: var(--fg); }
+.stat-total .stat-value  { color: var(--fg); }
+.stat-added .stat-stripe { background: var(--green); }
+.stat-added .stat-value  { color: var(--green); }
+.stat-removed .stat-stripe { background: var(--red); }
+.stat-removed .stat-value  { color: var(--red); }
+.stat-changed .stat-stripe { background: var(--amber); }
+.stat-changed .stat-value  { color: var(--amber); }
+.stat-fuzzy .stat-stripe { background: var(--purple); }
+.stat-fuzzy .stat-value  { color: var(--purple); }
+.stat-same .stat-stripe { background: var(--fg-4); }
+.stat-same .stat-value  { color: var(--fg-4); }
+
+/* ══════════════════════════════════════════════════
+   EMPTY STATE
+══════════════════════════════════════════════════ */
+.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; gap: 18px; padding: 60px; text-align: center; }
+.empty-box {
+  width: 90px; height: 90px; border: var(--border); box-shadow: var(--shadow-lg);
+  background: var(--bg-2); display: flex; align-items: center; justify-content: center;
+  font-size: 38px; position: relative; animation: wobble 4s ease-in-out infinite;
+}
+.empty-box::after { content: ''; position: absolute; inset: -1px; border: var(--border); transform: translate(6px,6px); z-index: -1; background: var(--yellow); }
+[data-theme="dark"] .empty-box::after { background: #2A2400; }
+@keyframes wobble { 0%,100%{transform:rotate(0)} 25%{transform:rotate(-1.5deg)} 75%{transform:rotate(1.5deg)} }
+.empty-title { font-size: 24px; font-weight: 700; position: relative; display: inline-block; }
+.empty-title::after { content: ''; position: absolute; bottom: -3px; left: 0; right: 0; height: 3px; background: var(--accent); }
+.empty-sub { color: var(--fg-3); font-family: var(--mono); font-size: 11px; max-width: 360px; line-height: 1.7; }
+
+/* ══════════════════════════════════════════════════
+   COMPARE FILE CARDS
+══════════════════════════════════════════════════ */
+.compare-files { display: flex; gap: 10px; align-items: center; padding: 12px 18px; background: var(--bg-2); border-bottom: var(--border); flex-shrink: 0; }
+.compare-file-card { flex: 1; border: var(--border); padding: 10px 13px; display: flex; align-items: center; gap: 10px; box-shadow: var(--shadow-sm); background: var(--bg); transition: all var(--tr); }
+.compare-file-card:hover { box-shadow: var(--shadow); }
+.compare-file-icon { font-size: 22px; }
+.compare-file-body { flex: 1; min-width: 0; }
+.compare-file-name { font-size: 12px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: var(--mono); }
+.compare-file-meta { font-size: 10px; color: var(--fg-3); margin-top: 2px; font-family: var(--mono); }
+.compare-arrow { font-size: 20px; font-weight: 700; color: var(--accent); font-family: var(--mono); }
+
+/* Diff filter bar */
+.diff-filter-bar { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; }
+.diff-filter-btn {
+  display: flex; align-items: center; gap: 4px; padding: 3px 10px;
+  font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+  font-family: var(--mono); border: var(--border-sm); cursor: pointer;
+  transition: all var(--tr); background: var(--bg);
+}
+.diff-filter-btn:hover, .diff-filter-btn.active { color: #fff; }
+.diff-filter-btn.all:hover,    .diff-filter-btn.all.active    { background: var(--fg);     border-color: var(--fg); }
+.diff-filter-btn.added:hover,  .diff-filter-btn.added.active  { background: var(--green);  border-color: var(--green); }
+.diff-filter-btn.removed:hover,.diff-filter-btn.removed.active{ background: var(--red);    border-color: var(--red); }
+.diff-filter-btn.changed:hover,.diff-filter-btn.changed.active{ background: var(--amber);  border-color: var(--amber); }
+.diff-filter-btn.fuzzy:hover,  .diff-filter-btn.fuzzy.active  { background: var(--purple); border-color: var(--purple); }
+.diff-filter-btn.same:hover,   .diff-filter-btn.same.active   { background: var(--fg-3);   border-color: var(--fg-3); }
+
+/* Legend */
+.diff-legend { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.legend-item { display: flex; align-items: center; gap: 4px; font-size: 10px; color: var(--fg-3); font-family: var(--mono); }
+.legend-dot { width: 10px; height: 10px; }
+.legend-dot.added   { background: var(--green); }
+.legend-dot.removed { background: var(--red); }
+.legend-dot.changed { background: var(--amber); }
+.legend-dot.fuzzy   { background: var(--purple); }
+
+/* ══════════════════════════════════════════════════
+   ANALIZ TAB
+══════════════════════════════════════════════════ */
+.analiz-panel { flex: 1; overflow: auto; padding: 18px; display: flex; flex-direction: column; gap: 16px; }
+.analiz-section-title {
+  font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+  font-family: var(--mono); color: var(--fg-3);
+  border-bottom: var(--border-sm); padding-bottom: 6px; margin-bottom: 10px;
+}
+
+/* Stat grid (column statistics) */
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+.stat-grid-card {
+  border: var(--border); background: var(--bg); box-shadow: var(--shadow-sm); padding: 12px 14px;
+  transition: all var(--tr);
+}
+.stat-grid-card:hover { box-shadow: var(--shadow); transform: translate(-1px,-1px); }
+.sgc-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.sgc-name { font-family: var(--mono); font-size: 11px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+.sgc-type { font-family: var(--mono); font-size: 8px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 1px 4px; border: 1px solid; }
+.sgc-type.num   { background: var(--green-bg); color: var(--green);  border-color: var(--green); }
+.sgc-type.text  { background: var(--blue-bg);  color: var(--blue);   border-color: var(--blue); }
+.sgc-type.date  { background: var(--purple-bg);color: var(--purple); border-color: var(--purple); }
+.sgc-type.mixed { background: var(--amber-bg); color: var(--amber);  border-color: var(--amber); }
+.sgc-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 10px; }
+.sgc-stat { display: flex; flex-direction: column; }
+.sgc-stat-label { font-size: 8px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--fg-4); font-family: var(--mono); }
+.sgc-stat-value { font-size: 13px; font-weight: 700; font-family: var(--mono); color: var(--fg); }
+.sgc-null-bar { height: 4px; background: var(--bg-3); margin-top: 8px; position: relative; }
+.sgc-null-fill { height: 100%; background: var(--red); transition: width 0.4s ease; }
+
+/* Schema badges */
+.schema-grid { display: flex; flex-direction: column; gap: 6px; }
+.schema-row { display: flex; align-items: center; gap: 8px; padding: 7px 10px; background: var(--bg-2); border: var(--border-sm); }
+.schema-col-name { font-family: var(--mono); font-size: 11px; font-weight: 700; flex: 1; overflow: hidden; text-overflow: ellipsis; }
+.schema-badge {
+  font-family: var(--mono); font-size: 9px; font-weight: 700; letter-spacing: 1px;
+  text-transform: uppercase; padding: 2px 7px; border: 1px solid;
+}
+.schema-badge.email    { background: var(--blue-bg);   color: var(--blue);   border-color: var(--blue); }
+.schema-badge.url      { background: var(--blue-bg);   color: var(--blue);   border-color: var(--blue); }
+.schema-badge.date     { background: var(--purple-bg); color: var(--purple); border-color: var(--purple); }
+.schema-badge.currency { background: var(--green-bg);  color: var(--green);  border-color: var(--green); }
+.schema-badge.phone    { background: var(--amber-bg);  color: var(--amber);  border-color: var(--amber); }
+.schema-badge.integer  { background: var(--green-bg);  color: var(--green);  border-color: var(--green); }
+.schema-badge.float    { background: var(--green-bg);  color: var(--green);  border-color: var(--green); }
+.schema-badge.boolean  { background: var(--accent-bg); color: var(--accent); border-color: var(--accent); }
+.schema-badge.text     { background: var(--bg-3);      color: var(--fg-3);   border-color: var(--fg-3); }
+.schema-badge.mixed    { background: var(--amber-bg);  color: var(--amber);  border-color: var(--amber); }
+.schema-sample { font-family: var(--mono); font-size: 9px; color: var(--fg-4); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Chart */
+.chart-box { border: var(--border); background: var(--bg); box-shadow: var(--shadow-sm); padding: 16px; }
+.chart-controls { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
+.chart-select {
+  padding: 5px 8px; background: var(--bg-2); border: var(--border-sm);
+  color: var(--fg); font-family: var(--mono); font-size: 11px; cursor: pointer;
+}
+.chart-select:focus { outline: 2px solid var(--accent); outline-offset: 0; }
+.chart-canvas-wrap { position: relative; max-height: 300px; }
+
+/* Heatmap */
+.heatmap-table { width: 100%; border-collapse: collapse; font-size: 11px; font-family: var(--mono); }
+.heatmap-table th { padding: 6px 10px; background: var(--fg); color: var(--bg-3); font-size: 9px; font-weight: 700; letter-spacing: 1px; text-align: left; }
+.heatmap-table td { padding: 4px 10px; border: 1px solid var(--bg-3); text-align: center; font-size: 10px; font-weight: 700; }
+.hm-full  { background: var(--green-2); color: var(--green); }
+.hm-empty { background: var(--red-2);   color: var(--red); }
+.hm-partial { background: var(--amber-2); color: var(--amber); }
+
+/* Pivot */
+.pivot-controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 10px; }
+.pivot-select {
+  padding: 5px 8px; background: var(--bg-2); border: var(--border-sm);
+  color: var(--fg); font-family: var(--mono); font-size: 11px; cursor: pointer;
+  min-width: 120px;
+}
+.pivot-select:focus { outline: 2px solid var(--accent); outline-offset: 0; }
+.pivot-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.pivot-table th { background: var(--fg); color: var(--bg-3); padding: 8px 12px; text-align: left; font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: 1px; border-right: 1px solid rgba(255,255,255,0.1); }
+.pivot-table td { padding: 7px 12px; border-bottom: 1px solid var(--bg-3); border-right: 1px solid var(--bg-3); background: var(--bg); }
+.pivot-table tbody tr:nth-child(even) td { background: var(--bg-2); }
+.pivot-table tbody tr:hover td { background: var(--accent-bg); }
+.pivot-table td.pivot-val { font-family: var(--mono); font-weight: 700; text-align: right; color: var(--accent); }
+
+/* ══════════════════════════════════════════════════
+   ANALIZ SIDEBAR
+══════════════════════════════════════════════════ */
+.analiz-sidebar { display: flex; flex-direction: column; gap: 10px; }
+
+/* ══════════════════════════════════════════════════
+   ROW DETAIL PANEL (slide-in from right)
+══════════════════════════════════════════════════ */
+.detail-panel {
+  position: fixed; top: 54px; right: 0; bottom: 0;
+  width: 320px; background: var(--bg);
+  border-left: var(--border); box-shadow: -5px 0 0 var(--border-c);
+  z-index: 150; display: flex; flex-direction: column;
+  transform: translateX(100%); transition: transform 0.2s ease;
+}
+.detail-panel.open { transform: translateX(0); }
+.detail-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 11px 14px; background: var(--fg); color: var(--bg);
+  flex-shrink: 0;
+}
+.detail-header h3 { font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+.detail-close { background: none; border: none; color: var(--bg); font-size: 18px; cursor: pointer; line-height: 1; padding: 0 2px; }
+.detail-close:hover { color: var(--yellow); }
+.detail-body { flex: 1; overflow-y: auto; padding: 12px; }
+.detail-row { border-bottom: 1px solid var(--bg-3); padding: 8px 0; }
+.detail-row:last-child { border-bottom: none; }
+.detail-key { font-family: var(--mono); font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--fg-3); margin-bottom: 3px; }
+.detail-val { font-size: 13px; font-weight: 500; word-break: break-word; }
+
+/* ══════════════════════════════════════════════════
+   KEYBOARD SHORTCUT MODAL
+══════════════════════════════════════════════════ */
+.kbd-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 500;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity 0.2s;
+}
+.kbd-overlay.open { opacity: 1; pointer-events: all; }
+.kbd-modal {
+  background: var(--bg); border: var(--border); box-shadow: var(--shadow-lg);
+  padding: 24px; min-width: 340px; max-width: 480px;
+}
+.kbd-modal h2 { font-size: 14px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.kbd-list { display: flex; flex-direction: column; gap: 8px; }
+.kbd-item { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--bg-3); }
+.kbd-item:last-child { border-bottom: none; }
+.kbd-desc { font-size: 12px; color: var(--fg-3); }
+.kbd-key { display: flex; gap: 4px; }
+.kbd-key kbd {
+  background: var(--fg); color: var(--bg); font-family: var(--mono);
+  font-size: 10px; font-weight: 700; padding: 2px 7px;
+  border: 1px solid var(--fg-3);
+}
+
+/* ══════════════════════════════════════════════════
+   LOADING
+══════════════════════════════════════════════════ */
+.loading-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(0,0,0,0.72);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity 0.2s;
+}
+.loading-overlay.visible { opacity: 1; pointer-events: all; }
+.loading-box { background: var(--bg); border: var(--border); box-shadow: var(--shadow-lg); padding: 28px 44px; text-align: center; }
+.spinner { width: 32px; height: 32px; border: 3px solid var(--bg-3); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.65s linear infinite; margin: 0 auto 14px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { font-size: 12px; font-weight: 700; font-family: var(--mono); color: var(--fg-3); }
+
+/* ══════════════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════════════ */
+.toast-container { position: fixed; bottom: 18px; right: 18px; z-index: 2000; display: flex; flex-direction: column; gap: 7px; }
+.toast {
+  display: flex; align-items: center; gap: 9px; padding: 9px 14px;
+  background: var(--bg); border: var(--border); box-shadow: var(--shadow-lg);
+  font-size: 12px; font-weight: 600; animation: slideUp 0.22s ease; max-width: 320px;
+}
+@keyframes slideUp { from{transform:translateY(16px);opacity:0} to{transform:translateY(0);opacity:1} }
+.toast.success { border-left: 5px solid var(--green); }
+.toast.error   { border-left: 5px solid var(--red);   }
+.toast.info    { border-left: 5px solid var(--blue);  }
+
+/* ══════════════════════════════════════════════════
+   TOOLTIP
+══════════════════════════════════════════════════ */
+.cell-tooltip {
+  position: fixed; background: var(--fg); color: var(--bg);
+  border: var(--border); padding: 6px 10px;
+  font-size: 11px; font-family: var(--mono); max-width: 280px; word-break: break-all;
+  box-shadow: var(--shadow); z-index: 500; pointer-events: none;
+  opacity: 0; transition: opacity 0.1s;
+}
+.cell-tooltip.visible { opacity: 1; }
+
+/* ══════════════════════════════════════════════════
+   HIGHLIGHT
+══════════════════════════════════════════════════ */
+mark.hl { background: var(--yellow); color: var(--fg); padding: 0 1px; }
+
+/* ══════════════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════════════ */
+@media (max-width: 860px) { .sidebar { width: 240px; min-width: 220px; } }
+@media (max-width: 680px) { header { padding: 0 14px; } .sidebar { display: none; } .tab-bar { padding: 0 14px; } .table-container { padding: 10px; } }
+
+/* Frozen first column */
+.frozen-col { position: sticky; left: 0; z-index: 5; }
+.frozen-col-head { position: sticky; left: 0; z-index: 11; }
+  </style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-box"><div class="spinner"></div><div class="loading-text" id="loadingText">İşleniyor…</div></div>
+</div>
+<div class="toast-container" id="toastContainer"></div>
+<div class="cell-tooltip" id="cellTooltip"></div>
+
+<!-- Row Detail Panel -->
+<div class="detail-panel" id="detailPanel">
+  <div class="detail-header">
+    <h3>// Satır Detayı</h3>
+    <button class="detail-close" onclick="closeDetail()">✕</button>
+  </div>
+  <div class="detail-body" id="detailBody"></div>
+</div>
+
+<!-- Keyboard shortcuts modal -->
+<div class="kbd-overlay" id="kbdOverlay" onclick="if(event.target===this)closeKbd()">
+  <div class="kbd-modal">
+    <h2>⌨ Klavye Kısayolları</h2>
+    <div class="kbd-list">
+      <div class="kbd-item"><span class="kbd-desc">Arama odakla</span><div class="kbd-key"><kbd>Ctrl</kbd><kbd>F</kbd></div></div>
+      <div class="kbd-item"><span class="kbd-desc">Dışa aktar</span><div class="kbd-key"><kbd>Ctrl</kbd><kbd>E</kbd></div></div>
+      <div class="kbd-item"><span class="kbd-desc">Gece/Gündüz modu</span><div class="kbd-key"><kbd>Ctrl</kbd><kbd>D</kbd></div></div>
+      <div class="kbd-item"><span class="kbd-desc">Tam ekran</span><div class="kbd-key"><kbd>Ctrl</kbd><kbd>Shift</kbd><kbd>F</kbd></div></div>
+      <div class="kbd-item"><span class="kbd-desc">Detay paneli kapat</span><div class="kbd-key"><kbd>Esc</kbd></div></div>
+      <div class="kbd-item"><span class="kbd-desc">Kısayollar</span><div class="kbd-key"><kbd>Ctrl</kbd><kbd>K</kbd></div></div>
+    </div>
+    <br>
+    <button class="btn btn-secondary btn-sm btn-full" onclick="closeKbd()">✕ Kapat</button>
+  </div>
+</div>
+
+<div class="app-wrapper">
+
+  <!-- ═══ HEADER ═══ -->
+  <header>
+    <div class="logo">
+      <div class="logo-mark" style="background: linear-gradient(135deg, var(--accent), var(--green)); border-radius: 4px;">AT</div>
+      <div class="logo-sep"></div>
+      <div class="logo-text">AATools <em>ExcelLens</em></div>
+    </div>
+    <div class="header-right">
+      <!-- Export -->
+      <div class="export-wrap">
+        <button class="hbtn" onclick="toggleExportMenu()" id="exportMenuBtn">↓ Export</button>
+        <div class="export-dropdown" id="exportDropdown">
+          <div class="export-opt" onclick="exportAs('xlsx')">📊 Excel (.xlsx)</div>
+          <div class="export-opt" onclick="exportAs('csv')">📄 CSV</div>
+          <div class="export-opt" onclick="exportAs('json')">{ } JSON</div>
+        </div>
+      </div>
+      <div class="h-sep"></div>
+      <button class="hbtn icon-only" title="Tam Ekran (Ctrl+Shift+F)" onclick="toggleFullscreen()">⛶</button>
+      <button class="hbtn icon-only" title="Kısayollar (Ctrl+K)" onclick="openKbd()">⌨</button>
+      <div class="h-sep"></div>
+      <button class="hbtn" id="themeToggleBtn" onclick="toggleTheme()">
+        <span id="themeIcon">☀</span>
+        <span id="themeLabel">Gece</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ═══ TABS ═══ -->
+  <div class="tab-bar">
+    <button class="tab-btn active" data-tab="single"  onclick="switchTab('single')">▤ Tekli Görünüm <span class="tab-count" id="singleTabCount">0</span></button>
+    <button class="tab-btn"        data-tab="compare" onclick="switchTab('compare')">⇄ Karşılaştır <span class="tab-count" id="compareTabCount">0</span></button>
+    <button class="tab-btn"        data-tab="analiz"  onclick="switchTab('analiz')">◈ Analiz <span class="tab-count" id="analizTabCount">0</span></button>
+  </div>
+
+  <div class="main-content">
+
+    <!-- ═══════════════════════════════════════
+         SIDEBAR
+    ═══════════════════════════════════════ -->
+    <div class="sidebar" id="sidebar">
+
+      <!-- SINGLE SIDEBAR -->
+      <div id="singleSidebar">
+        <!-- File -->
+        <div class="sidebar-section">
+          <div class="sidebar-section-header" onclick="toggleSection(this)">
+            <span class="sidebar-section-title">// Dosya</span><span class="section-toggle open">▲</span>
+          </div>
+          <div class="sidebar-section-body">
+            <div class="drop-zone" id="singleDropZone"
+                 onclick="document.getElementById('singleFileInput').click()"
+                 ondragover="handleDragOver(event,'singleDropZone')"
+                 ondragleave="handleDragLeave(event,'singleDropZone')"
+                 ondrop="handleDrop(event,'single')">
+              <input type="file" id="singleFileInput" accept=".xlsx,.xls,.csv" onchange="loadSingleFile(this)">
+              <div class="drop-icon">📂</div>
+              <div class="drop-title">Dosya Yükle</div>
+              <div class="drop-sub">.xlsx / .xls / .csv</div>
+              <div class="drop-file-name" id="singleFileName"></div>
+            </div>
+            <select class="sheet-select" id="singleSheetSelect" onchange="loadSheet('single')" style="display:none"></select>
+            <div id="singleHeaderSelectWrap" style="display:none;margin-top:8px">
+              <div class="sidebar-label">Başlık Satırı</div>
+              <select class="sheet-select" id="singleHeaderRowSelect" onchange="changeHeaderRow('single')" style="margin-top:2px"></select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Columns -->
+        <div class="sidebar-section" id="singleColSection" style="display:none">
+          <div class="sidebar-section-header" onclick="toggleSection(this)">
+            <span class="sidebar-section-title">// Sütunlar</span><span class="section-toggle open">▲</span>
+          </div>
+          <div class="sidebar-section-body">
+            <input class="col-search" type="text" placeholder="sütun ara…" id="colSearch" oninput="filterColList()">
+            <div class="col-actions">
+              <button class="col-action-btn" onclick="toggleAllCols(true)">Tümü</button>
+              <button class="col-action-btn" onclick="toggleAllCols(false)">Temizle</button>
+            </div>
+            <div class="col-list" id="colList"></div>
+          </div>
+        </div>
+
+        <!-- Advanced Filters -->
+        <div class="sidebar-section" id="singleFilterSection" style="display:none">
+          <div class="sidebar-section-header" onclick="toggleSection(this)">
+            <span class="sidebar-section-title">// Filtreler</span><span class="section-toggle open">▲</span>
+          </div>
+          <div class="sidebar-section-body">
+            <div class="filter-list" id="filterList"></div>
+            <button class="filter-clear-btn" onclick="clearAllFilters()">✕ Filtreleri Temizle</button>
+          </div>
+        </div>
+
+        <!-- Tools -->
+        <div class="sidebar-section" id="singleToolsSection" style="display:none">
+          <div class="sidebar-section-header" onclick="toggleSection(this)">
+            <span class="sidebar-section-title">// Araçlar</span><span class="section-toggle open">▲</span>
+          </div>
+          <div class="sidebar-section-body">
+            <button class="tool-btn" id="dupBtn" onclick="toggleDuplicates()">⊕ Tekrar Edenleri Bul</button>
+            <div id="dupCols" style="display:none">
+              <div class="sidebar-label">Kontrol edilecek sütunlar:</div>
+              <div class="dup-cols-list" id="dupColsList"></div>
+              <br>
+              <button class="tool-btn" onclick="runDuplicates()">▶ Uygula</button>
+            </div>
+            <div class="tool-sep"></div>
+            <button class="tool-btn" id="freezeBtn" onclick="toggleFreezeCol()">❄ İlk Sütunu Dondur</button>
+            <div class="tool-sep"></div>
+            <div class="sidebar-label">Satır Yüksekliği</div>
+            <input type="range" min="24" max="60" value="32" style="width:100%;margin-top:4px;accent-color:var(--accent)" oninput="setRowHeight(this.value)">
+          </div>
+        </div>
+
+      </div>
+
+      <!-- COMPARE SIDEBAR -->
+      <div id="compareSidebar" style="display:none">
+        <div class="sidebar-section">
+          <div class="sidebar-section-header green" onclick="toggleSection(this)">
+            <span class="sidebar-section-title">// Dosya 1 — Eski</span><span class="section-toggle open">▲</span>
+          </div>
+          <div class="sidebar-section-body">
+            <div class="drop-zone" id="compareDropZone1"
+                 onclick="document.getElementById('compareFileInput1').click()"
+                 ondragover="handleDragOver(event,'compareDropZone1')"
+                 ondragleave="handleDragLeave(event,'compareDropZone1')"
+                 ondrop="handleDrop(event,'compare1')">
+              <div class="drop-badge">01</div>
+              <input type="file" id="compareFileInput1" accept=".xlsx,.xls,.csv" onchange="loadCompareFile(this,1)">
+              <div class="drop-icon">📗</div>
+              <div class="drop-title">Kaynak Dosya</div>
+              <div class="drop-sub">.xlsx / .xls / .csv</div>
+              <div class="drop-file-name" id="compareFileName1"></div>
+            </div>
+            <select class="sheet-select" id="compareSheetSelect1" onchange="loadSheet('compare1')" style="display:none"></select>
+            <div id="compareHeaderSelectWrap1" style="display:none;margin-top:8px">
+              <div class="sidebar-label">Başlık Satırı</div>
+              <select class="sheet-select" id="compareHeaderRowSelect1" onchange="changeHeaderRow('compare1')" style="margin-top:2px"></select>
+            </div>
+          </div>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-header blue" onclick="toggleSection(this)">
+            <span class="sidebar-section-title">// Dosya 2 — Yeni</span><span class="section-toggle open">▲</span>
+          </div>
+          <div class="sidebar-section-body">
+            <div class="drop-zone" id="compareDropZone2"
+                 onclick="document.getElementById('compareFileInput2').click()"
+                 ondragover="handleDragOver(event,'compareDropZone2')"
+                 ondragleave="handleDragLeave(event,'compareDropZone2')"
+                 ondrop="handleDrop(event,'compare2')">
+              <div class="drop-badge b2">02</div>
+              <input type="file" id="compareFileInput2" accept=".xlsx,.xls,.csv" onchange="loadCompareFile(this,2)">
+              <div class="drop-icon">📘</div>
+              <div class="drop-title">Hedef Dosya</div>
+              <div class="drop-sub">.xlsx / .xls / .csv</div>
+              <div class="drop-file-name" id="compareFileName2"></div>
+            </div>
+            <select class="sheet-select" id="compareSheetSelect2" onchange="loadSheet('compare2')" style="display:none"></select>
+            <div id="compareHeaderSelectWrap2" style="display:none;margin-top:8px">
+              <div class="sidebar-label">Başlık Satırı</div>
+              <select class="sheet-select" id="compareHeaderRowSelect2" onchange="changeHeaderRow('compare2')" style="margin-top:2px"></select>
+            </div>
+          </div>
+        </div>
+
+        <div class="sidebar-section" id="compareSettingsSection" style="display:none">
+          <div class="sidebar-section-header" onclick="toggleSection(this)">
+            <span class="sidebar-section-title">// Ayarlar</span><span class="section-toggle open">▲</span>
+          </div>
+          <div class="sidebar-section-body" style="display:flex;flex-direction:column;gap:9px">
+            <div>
+              <div class="sidebar-label">Anahtar Sütun (Eşleştirme)</div>
+              <select class="key-select" id="keyColumnSelect">
+                <option value="__diff__">Akıllı Eşleştirme (Diff Algoritması)</option>
+                <option value="">Satır sırası ile eşleştir (Basit)</option>
+              </select>
+            </div>
+            <div>
+              <label style="display:flex;align-items:center;gap:7px;font-size:11px;cursor:pointer">
+                <input type="checkbox" id="fuzzyToggle" style="accent-color:var(--purple);width:13px;height:13px">
+                <span style="font-family:var(--mono);font-size:10px;font-weight:700">Fuzzy Diff (%70 benzerlik)</span>
+              </label>
+            </div>
+            <button class="btn btn-primary btn-full" onclick="runComparison()">⇄ Karşılaştır</button>
+            <button class="btn btn-success btn-full btn-sm" onclick="exportDiff()">↓ Diff Excel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ANALIZ SIDEBAR -->
+      <div id="analizSidebar" style="display:none">
+        <div class="sidebar-section">
+          <div class="sidebar-section-header" onclick="toggleSection(this)">
+            <span class="sidebar-section-title">// Analiz Görünümü</span><span class="section-toggle open">▲</span>
+          </div>
+          <div class="sidebar-section-body" style="display:flex;flex-direction:column;gap:7px">
+            <button class="tool-btn" onclick="showAnalizSection('stats')">📊 Sütun İstatistikleri</button>
+            <button class="tool-btn" onclick="showAnalizSection('chart')">📈 Grafik</button>
+            <button class="tool-btn" onclick="showAnalizSection('heatmap')">🔥 Null Haritası</button>
+            <button class="tool-btn" onclick="showAnalizSection('schema')">🧬 Şema Tespiti</button>
+            <button class="tool-btn" onclick="showAnalizSection('pivot')">↔ Pivot Tablo</button>
+          </div>
+        </div>
+
+        <div class="sidebar-section" id="chartSidebarSection" style="display:none">
+          <div class="sidebar-section-header" onclick="toggleSection(this)">
+            <span class="sidebar-section-title">// Grafik Ayarları</span><span class="section-toggle open">▲</span>
+          </div>
+          <div class="sidebar-section-body" style="display:flex;flex-direction:column;gap:8px">
+            <div><div class="sidebar-label">Sütun</div>
+            <select class="key-select" id="chartColSelect" onchange="renderChart()" style="margin-top:5px"></select></div>
+            <div><div class="sidebar-label">Grafik Tipi</div>
+            <select class="key-select" id="chartTypeSelect" onchange="renderChart()" style="margin-top:5px">
+              <option value="bar">Bar</option>
+              <option value="pie">Pie</option>
+              <option value="doughnut">Doughnut</option>
+            </select></div>
+            <div><div class="sidebar-label">Top N Değer</div>
+            <input type="number" value="10" min="3" max="50" id="chartTopN"
+                   style="width:100%;padding:5px 8px;background:var(--bg-2);border:var(--border-sm);color:var(--fg);font-family:var(--mono);font-size:11px"
+                   onchange="renderChart()"></div>
+          </div>
+        </div>
+
+        <div class="sidebar-section" id="pivotSidebarSection" style="display:none">
+          <div class="sidebar-section-header" onclick="toggleSection(this)">
+            <span class="sidebar-section-title">// Pivot Ayarları</span><span class="section-toggle open">▲</span>
+          </div>
+          <div class="sidebar-section-body" style="display:flex;flex-direction:column;gap:8px">
+            <div><div class="sidebar-label">Satır Alanı</div>
+            <select class="key-select" id="pivotRowField" style="margin-top:5px"></select></div>
+            <div><div class="sidebar-label">Değer Alanı</div>
+            <select class="key-select" id="pivotValField" style="margin-top:5px"></select></div>
+            <div><div class="sidebar-label">Fonksiyon</div>
+            <select class="key-select" id="pivotFunc" style="margin-top:5px">
+              <option value="count">Sayı (COUNT)</option>
+              <option value="sum">Toplam (SUM)</option>
+              <option value="avg">Ortalama (AVG)</option>
+              <option value="min">En Az (MIN)</option>
+              <option value="max">En Çok (MAX)</option>
+            </select></div>
+            <button class="btn btn-primary btn-full btn-sm" onclick="renderPivot()">▶ Pivot Oluştur</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ═══════════════════════════════════════
+         CONTENT
+    ═══════════════════════════════════════ -->
+    <div class="content-area" id="contentArea">
+
+      <!-- ══ SINGLE TAB ══ -->
+      <div class="tab-panel active" id="singlePanel">
+        <div class="toolbar">
+          <div class="search-box">
+            <span class="search-icon">⌕</span>
+            <input type="text" placeholder="tabloda ara…" id="tableSearch" oninput="applyFiltersAndSearch()">
+          </div>
+          <div class="toolbar-sep"></div>
+          <div class="row-count" id="rowCount"><strong>0</strong> / 0 satır</div>
+          <div id="dupCount" style="display:none;font-size:11px;font-family:var(--mono);padding:4px 9px;background:var(--purple-bg);border:var(--border-sm);border-color:var(--purple);color:var(--purple);">⊕ <strong id="dupCountVal">0</strong> tekrar</div>
+          <div style="flex:1"></div>
+          <button class="btn btn-ghost btn-sm" onclick="sortData(null)" title="Sıralamayı sıfırla">↕</button>
+        </div>
+
+        <div id="singleEmpty" class="empty-state">
+          <div class="empty-box">▤</div>
+          <div class="empty-title">Dosya Yükleyin</div>
+          <div class="empty-sub">Sol panelden bir .xlsx / .xls / .csv dosyası sürükleyin ya da tıklayın.</div>
+        </div>
+
+        <div class="table-container" id="singleTableContainer" style="display:none">
+          <div class="data-table-wrap">
+            <table class="data-table" id="singleTable">
+              <thead id="singleThead"><tr></tr></thead>
+              <tbody id="singleTbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ COMPARE TAB ══ -->
+      <div class="tab-panel" id="comparePanel">
+        <div id="compareEmpty" class="empty-state">
+          <div class="empty-box">⇄</div>
+          <div class="empty-title">İki Dosyayı Karşılaştırın</div>
+          <div class="empty-sub">Sol panelden kaynak ve hedef dosyaları yükleyin, ardından karşılaştırın.</div>
+        </div>
+
+        <div id="compareContent" style="display:none;flex:1;flex-direction:column;overflow:hidden">
+          <div class="compare-files">
+            <div class="compare-file-card">
+              <div class="compare-file-icon">📗</div>
+              <div class="compare-file-body">
+                <div class="compare-file-name" id="compareCard1Name">—</div>
+                <div class="compare-file-meta" id="compareCard1Meta">0 satır</div>
+              </div>
+            </div>
+            <div class="compare-arrow">→</div>
+            <div class="compare-file-card">
+              <div class="compare-file-icon">📘</div>
+              <div class="compare-file-body">
+                <div class="compare-file-name" id="compareCard2Name">—</div>
+                <div class="compare-file-meta" id="compareCard2Meta">0 satır</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="stats-bar">
+            <div class="stat-card stat-total"><div class="stat-stripe"></div><div class="stat-inner"><div class="stat-body"><div class="stat-value" id="statTotal">0</div><div class="stat-label">Toplam</div></div></div></div>
+            <div class="stat-card stat-added"><div class="stat-stripe"></div><div class="stat-inner"><div class="stat-body"><div class="stat-value" id="statAdded">0</div><div class="stat-label">Eklenen</div></div></div></div>
+            <div class="stat-card stat-removed"><div class="stat-stripe"></div><div class="stat-inner"><div class="stat-body"><div class="stat-value" id="statRemoved">0</div><div class="stat-label">Silinen</div></div></div></div>
+            <div class="stat-card stat-changed"><div class="stat-stripe"></div><div class="stat-inner"><div class="stat-body"><div class="stat-value" id="statChanged">0</div><div class="stat-label">Değişen</div></div></div></div>
+            <div class="stat-card stat-fuzzy"><div class="stat-stripe"></div><div class="stat-inner"><div class="stat-body"><div class="stat-value" id="statFuzzy">0</div><div class="stat-label">Benzer</div></div></div></div>
+            <div class="stat-card stat-same"><div class="stat-stripe"></div><div class="stat-inner"><div class="stat-body"><div class="stat-value" id="statSame">0</div><div class="stat-label">Aynı</div></div></div></div>
+          </div>
+
+          <div class="toolbar">
+            <div class="diff-filter-bar">
+              <span class="toolbar-label">Filtre:</span>
+              <button class="diff-filter-btn all active" onclick="setDiffFilter('all',this)">Tümü</button>
+              <button class="diff-filter-btn added"   onclick="setDiffFilter('added',this)">+ Eklendi</button>
+              <button class="diff-filter-btn removed" onclick="setDiffFilter('removed',this)">− Silindi</button>
+              <button class="diff-filter-btn changed" onclick="setDiffFilter('changed',this)">~ Değişti</button>
+              <button class="diff-filter-btn fuzzy"   onclick="setDiffFilter('fuzzy',this)">≈ Benzer</button>
+              <button class="diff-filter-btn same"    onclick="setDiffFilter('same',this)">= Aynı</button>
+            </div>
+            <div style="flex:1"></div>
+            <div class="diff-legend">
+              <div class="legend-item"><div class="legend-dot added"></div>Eklendi</div>
+              <div class="legend-item"><div class="legend-dot removed"></div>Silindi</div>
+              <div class="legend-item"><div class="legend-dot changed"></div>Değişti</div>
+              <div class="legend-item"><div class="legend-dot fuzzy"></div>Benzer</div>
+            </div>
+            <div class="row-count" id="diffRowCount"><strong>0</strong> satır</div>
+          </div>
+
+          <div class="table-container">
+            <div class="data-table-wrap">
+              <table class="data-table" id="diffTable">
+                <thead id="diffThead"><tr></tr></thead>
+                <tbody id="diffTbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ ANALİZ TAB ══ -->
+      <div class="tab-panel" id="analizPanel">
+        <div id="analizEmpty" class="empty-state">
+          <div class="empty-box">◈</div>
+          <div class="empty-title">Veri Analizi</div>
+          <div class="empty-sub">Tekli Görünüm sekmesinden bir dosya yükleyin, ardından sol menüden analiz türünü seçin.</div>
+        </div>
+        <div class="analiz-panel" id="analizContent" style="display:none">
+
+          <!-- Column Stats -->
+          <div id="analizStats">
+            <div class="analiz-section-title">◈ Sütun İstatistikleri</div>
+            <div class="stat-grid" id="statGrid"></div>
+          </div>
+
+          <!-- Chart -->
+          <div id="analizChart" style="display:none">
+            <div class="analiz-section-title">📈 Grafik</div>
+            <div class="chart-box">
+              <div class="chart-canvas-wrap"><canvas id="mainChart"></canvas></div>
+            </div>
+          </div>
+
+          <!-- Heatmap -->
+          <div id="analizHeatmap" style="display:none">
+            <div class="analiz-section-title">🔥 Null / Boş Haritası</div>
+            <div style="overflow:auto;border:var(--border);box-shadow:var(--shadow-sm)">
+              <table class="heatmap-table" id="heatmapTable">
+                <thead><tr id="heatmapThead"></tr></thead>
+                <tbody id="heatmapTbody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Schema -->
+          <div id="analizSchema" style="display:none">
+            <div class="analiz-section-title">🧬 Şema Tespiti</div>
+            <div class="schema-grid" id="schemaGrid"></div>
+          </div>
+
+          <!-- Pivot -->
+          <div id="analizPivot" style="display:none">
+            <div class="analiz-section-title">↔ Pivot Tablo</div>
+            <div style="overflow:auto;border:var(--border);box-shadow:var(--shadow-sm)">
+              <table class="pivot-table" id="pivotTable">
+                <thead><tr id="pivotThead"></tr></thead>
+                <tbody id="pivotTbody"></tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div><!-- /content-area -->
+  </div><!-- /main-content -->
+</div><!-- /app-wrapper -->
+
+<script>
+'use strict';
+// ════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════
+const S = {
+  single: {
+    wb: null, sheets: {}, sheet: null,
+    rawRows: {}, detectedHeaders: {}, headerIdx: {},
+    raw: [], headers: [], visible: new Set(),
+    types: {}, sortCol: null, sortDir: 'asc',
+    filters: {}, ops: {}, search: '', filtered: [],
+    dups: new Set(), dupCols: new Set(), showDups: false,
+    freezeCol: false, rowH: 32, renamed: {},
+    schema: {}, showSchemaHighlight: false
+  },
+  compare: {
+    f1: { wb: null, sheets: {}, sheet: null, rawRows: {}, detectedHeaders: {}, headerIdx: {}, raw: [], headers: [], name: '' },
+    f2: { wb: null, sheets: {}, sheet: null, rawRows: {}, detectedHeaders: {}, headerIdx: {}, raw: [], headers: [], name: '' },
+    result: [], filter: 'all', allHeaders: [], fuzzy: false
+  },
+  analiz: { section: 'stats', chart: null }
+};
+
+// ════════════════════════════════════════════════
+// UTILS
+// ════════════════════════════════════════════════
+const $ = id => document.getElementById(id);
+const showLoad = (t='İşleniyor…') => { $('loadingText').textContent = t; $('loadingOverlay').classList.add('visible'); };
+const hideLoad = () => $('loadingOverlay').classList.remove('visible');
+
+function toast(msg, type='info') {
+  const tc = $('toastContainer');
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  const ic = {success:'✓',error:'✕',info:'i'};
+  el.innerHTML = `<span>${ic[type]||'i'}</span><span>${msg}</span>`;
+  tc.appendChild(el);
+  setTimeout(() => { el.style.transition='0.25s'; el.style.opacity='0'; el.style.transform='translateY(8px)'; setTimeout(()=>el.remove(),260); }, 3000);
+}
+
+function toggleSection(h) {
+  const b = h.nextElementSibling;
+  const t = h.querySelector('.section-toggle');
+  const open = t.classList.contains('open');
+  b.style.display = open ? 'none' : '';
+  t.classList.toggle('open', !open);
+  t.textContent = open ? '▼' : '▲';
+}
+
+function esc(s) {
+  if (s===null||s===undefined) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function hl(text, q) {
+  if (!q) return esc(text);
+  return esc(text).replace(new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi'), '<mark class="hl">$1</mark>');
+}
+
+function detectType(data, col) {
+  let n = 0; const sample = data.slice(0, 60);
+  for (const r of sample) { const v = r[col]; if (v!==null&&v!==undefined&&v!==''&&!isNaN(Number(v))) n++; }
+  return n/Math.max(sample.length,1) > 0.7 ? 'num' : 'text';
+}
+
+// ── Schema detection ──────────────────────────
+function detectSchema(v) {
+  if (v===null||v===undefined||String(v).trim()==='') return 'empty';
+  const s = String(v).trim();
+  if (/^[\w.+\-]+@[\w.\-]+\.\w{2,}$/.test(s)) return 'email';
+  if (/^https?:\/\//i.test(s)) return 'url';
+  if (/^\+?[\d\s\-().]{7,16}$/.test(s) && /\d{5,}/.test(s)) return 'phone';
+  if (/^(true|false|yes|no|evet|hayır|1|0)$/i.test(s)) return 'boolean';
+  if (/^[$€£¥₺][\d,.]+$/.test(s)||/^[\d,.]+[$€£¥₺]$/.test(s)) return 'currency';
+  if (!isNaN(Number(s))&&s!=='') return Number.isInteger(Number(s))&&Math.abs(Number(s))<2e9 ? 'integer' : 'float';
+  if (/^\d{1,2}[\/.\-]\d{1,2}[\/.\-]\d{2,4}$/.test(s)||(/^\d{4}-\d{2}-\d{2}/.test(s)&&!isNaN(Date.parse(s)))) return 'date';
+  return 'text';
+}
+
+function colSchema(data, col) {
+  const counts = {};
+  data.slice(0,100).forEach(r => { const t = detectSchema(r[col]); counts[t]=(counts[t]||0)+1; });
+  delete counts['empty'];
+  const top = Object.entries(counts).sort((a,b)=>b[1]-a[1])[0];
+  return top ? top[0] : 'text';
+}
+
+function applySchemaClass(val, schema) {
+  const s = String(val);
+  const map = { email:'schema-email', url:'schema-url', date:'schema-date', currency:'schema-currency', phone:'schema-phone', boolean:'schema-boolean' };
+  return map[schema] || '';
+}
+
+// ── Levenshtein ───────────────────────────────
+function levenshtein(a, b) {
+  a = String(a); b = String(b);
+  if (a===b) return 0;
+  const m=a.length, n=b.length;
+  if (!m) return n; if (!n) return m;
+  const d = Array.from({length:m+1},(_,i)=>Array.from({length:n+1},(_,j)=>i===0?j:j===0?i:0));
+  for(let i=1;i<=m;i++) for(let j=1;j<=n;j++)
+    d[i][j]=a[i-1]===b[j-1]?d[i-1][j-1]:1+Math.min(d[i-1][j],d[i][j-1],d[i-1][j-1]);
+  return d[m][n];
+}
+function fuzzyScore(a, b) {
+  const ml = Math.max(String(a).length, String(b).length);
+  return ml===0 ? 1 : 1 - levenshtein(a,b)/ml;
+}
+
+// ════════════════════════════════════════════════
+// TABS
+// ════════════════════════════════════════════════
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab===tab));
+  ['single','compare','analiz'].forEach(t => {
+    $(`${t}Panel`).classList.toggle('active', t===tab);
+    const sb = $(`${t}Sidebar`);
+    if (sb) sb.style.display = t===tab ? '' : 'none';
+  });
+  if (tab==='analiz' && S.single.raw.length) refreshAnaliz();
+}
+
+// ════════════════════════════════════════════════
+// DRAG & DROP
+// ════════════════════════════════════════════════
+function handleDragOver(e, id) { e.preventDefault(); $(id).classList.add('dragover'); }
+function handleDragLeave(e, id){ $(id).classList.remove('dragover'); }
+function handleDrop(e, target) {
+  e.preventDefault();
+  const ids = {single:'singleDropZone',compare1:'compareDropZone1',compare2:'compareDropZone2'};
+  $(ids[target]).classList.remove('dragover');
+  const f = e.dataTransfer.files[0];
+  if (!f) return;
+  if (target==='single') processFile(f,'single');
+  else if (target==='compare1') processFile(f,'compare',1);
+  else if (target==='compare2') processFile(f,'compare',2);
+}
+
+// ════════════════════════════════════════════════
+// FILE LOADING
+// ════════════════════════════════════════════════
+function loadSingleFile(inp) { if(inp.files[0]) processFile(inp.files[0],'single'); }
+function loadCompareFile(inp,n){ if(inp.files[0]) processFile(inp.files[0],'compare',n); }
+
+// ── Header Detection & Override ───────────────────
+function detectHeaderRow(rows) {
+  if (!rows || rows.length === 0) return 0;
+  const maxScan = Math.min(rows.length, 15);
+  let bestIdx = 0;
+  let maxCount = -1;
+  for (let i = 0; i < maxScan; i++) {
+    const row = rows[i];
+    if (!row) continue;
+    let count = 0;
+    row.forEach(v => {
+      if (v !== null && v !== undefined && String(v).trim() !== '') {
+        count++;
+      }
+    });
+    if (count > maxCount) {
+      maxCount = count;
+      bestIdx = i;
+    }
+  }
+  return bestIdx;
+}
+
+function parseRowsWithHeader(rows, headerIdx) {
+  if (!rows || rows.length <= headerIdx) return { headers: [], data: [] };
+  const rawHeaders = rows[headerIdx] || [];
+  const headers = [];
+  const seen = new Set();
+  rawHeaders.forEach((h, colIdx) => {
+    let name = h !== null && h !== undefined ? String(h).trim() : '';
+    if (name === '') {
+      name = `Sütun_${colIdx + 1}`;
+    }
+    let uniqueName = name;
+    let dedupCounter = 1;
+    while (seen.has(uniqueName)) {
+      uniqueName = `${name}_${dedupCounter}`;
+      dedupCounter++;
+    }
+    seen.add(uniqueName);
+    headers.push(uniqueName);
+  });
+
+  const data = [];
+  for (let j = headerIdx + 1; j < rows.length; j++) {
+    const row = rows[j];
+    if (!row) continue;
+    const isEmpty = row.every(v => v === null || v === undefined || String(v).trim() === '');
+    if (isEmpty) continue;
+
+    const obj = {};
+    headers.forEach((h, colIdx) => {
+      obj[h] = row[colIdx] ?? '';
+    });
+    data.push(obj);
+  }
+  return { headers, data };
+}
+
+function populateHeaderRowSelect(selectId, autoIdx, totalRows) {
+  const sel = $(selectId);
+  if (!sel) return;
+  sel.innerHTML = '';
+  sel.appendChild(new Option(`Otomatik (Satır ${autoIdx + 1})`, 'auto'));
+  const limit = Math.min(totalRows, 20);
+  for (let i = 0; i < limit; i++) {
+    sel.appendChild(new Option(`${i + 1}. Satır`, i));
+  }
+  sel.value = 'auto';
+}
+
+function changeHeaderRow(target) {
+  if (target === 'single') {
+    const sheet = S.single.sheet;
+    const val = $('singleHeaderRowSelect').value;
+    S.single.headerIdx[sheet] = val === 'auto' ? 'auto' : parseInt(val);
+    loadSheet('single');
+  } else {
+    const num = target === 'compare1' ? 1 : 2;
+    const s = S.compare[`f${num}`];
+    const sheet = s.sheet;
+    const val = $(`compareHeaderRowSelect${num}`).value;
+    s.headerIdx[sheet] = val === 'auto' ? 'auto' : parseInt(val);
+    loadSheet(target);
+  }
+}
+
+function processFile(file, mode, num) {
+  showLoad('Dosya okunuyor…');
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const wb = XLSX.read(e.target.result, {type:'binary'});
+      if (mode==='single') {
+        S.single.wb = wb;
+        S.single.rawRows = {};
+        S.single.detectedHeaders = {};
+        S.single.headerIdx = {};
+        const sel = $('singleSheetSelect'); sel.innerHTML='';
+        wb.SheetNames.forEach(n => {
+          const sheet = wb.Sheets[n];
+          const raw = XLSX.utils.sheet_to_json(sheet, {header: 1, defval: ''});
+          S.single.rawRows[n] = raw;
+          const autoIdx = detectHeaderRow(raw);
+          S.single.detectedHeaders[n] = autoIdx;
+          S.single.headerIdx[n] = 'auto';
+          sel.appendChild(new Option(n,n));
+        });
+        sel.style.display = wb.SheetNames.length>1 ? '' : 'none';
+        $('singleFileName').textContent = '✓ '+file.name;
+        $('singleDropZone').classList.add('has-file');
+        S.single.sheet = wb.SheetNames[0];
+        S.single.renamed = {};
+        loadSheet('single');
+      } else {
+        const s = S.compare[`f${num}`];
+        s.wb=wb;
+        s.rawRows = {};
+        s.detectedHeaders = {};
+        s.headerIdx = {};
+        s.name=file.name;
+        const sel = $(`compareSheetSelect${num}`); sel.innerHTML='';
+        wb.SheetNames.forEach(n => {
+          const sheet = wb.Sheets[n];
+          const raw = XLSX.utils.sheet_to_json(sheet, {header: 1, defval: ''});
+          s.rawRows[n] = raw;
+          const autoIdx = detectHeaderRow(raw);
+          s.detectedHeaders[n] = autoIdx;
+          s.headerIdx[n] = 'auto';
+          sel.appendChild(new Option(n,n));
+        });
+        sel.style.display = wb.SheetNames.length>1?'':'none';
+        $(`compareFileName${num}`).textContent='✓ '+file.name;
+        $(`compareDropZone${num}`).classList.add('has-file');
+        s.sheet = wb.SheetNames[0];
+        loadSheet(`compare${num}`);
+      }
+    } catch(err) { toast('Dosya okunamadı: '+err.message,'error'); }
+    hideLoad();
+  };
+  reader.readAsBinaryString(file);
+}
+
+function loadSheet(target) {
+  if (target==='single') {
+    const sel=$('singleSheetSelect');
+    S.single.sheet = sel.value||sel.options[0]?.value;
+    if (!S.single.sheet) return;
+    
+    const rawRows = S.single.rawRows[S.single.sheet] || [];
+    const autoIdx = S.single.detectedHeaders[S.single.sheet] ?? 0;
+    const selectedIdx = S.single.headerIdx[S.single.sheet] ?? 'auto';
+    const activeIdx = selectedIdx === 'auto' ? autoIdx : selectedIdx;
+    
+    const { headers, data } = parseRowsWithHeader(rawRows, activeIdx);
+    S.single.raw = data;
+    S.single.headers = headers;
+    S.single.visible = new Set(headers);
+    
+    S.single.filters={}; S.single.ops={}; S.single.dups=new Set(); S.single.showDups=false;
+    S.single.types={}; S.single.schema={};
+    headers.forEach(c => { S.single.types[c]=detectType(data,c); S.single.schema[c]=colSchema(data,c); });
+    
+    populateHeaderRowSelect('singleHeaderRowSelect', autoIdx, rawRows.length);
+    $('singleHeaderRowSelect').value = selectedIdx;
+    $('singleHeaderSelectWrap').style.display = '';
+    
+    buildColList(); buildFilterList(); buildDupColsList();
+    $('singleColSection').style.display='';
+    $('singleFilterSection').style.display='';
+    $('singleToolsSection').style.display='';
+    applyAndRender();
+    $('singleEmpty').style.display='none';
+    $('singleTableContainer').style.display='';
+    $('singleTabCount').textContent=data.length;
+    $('singleTabCount').classList.add('visible');
+    $('analizTabCount').textContent=data.length;
+    $('analizTabCount').classList.add('visible');
+    if ($('analizContent').style.display!=='none') refreshAnaliz();
+    toast(`${data.length.toLocaleString()} satır yüklendi`,'success');
+  } else {
+    const n = target==='compare1'?1:2;
+    const s = S.compare[`f${n}`];
+    const sel=$(`compareSheetSelect${n}`);
+    s.sheet=sel.value||sel.options[0]?.value;
+    if(!s.sheet) return;
+    
+    const rawRows = s.rawRows[s.sheet] || [];
+    const autoIdx = s.detectedHeaders[s.sheet] ?? 0;
+    const selectedIdx = s.headerIdx[s.sheet] ?? 'auto';
+    const activeIdx = selectedIdx === 'auto' ? autoIdx : selectedIdx;
+    
+    const { headers, data } = parseRowsWithHeader(rawRows, activeIdx);
+    s.raw = data;
+    s.headers = headers;
+    
+    populateHeaderRowSelect(`compareHeaderRowSelect${n}`, autoIdx, rawRows.length);
+    $(`compareHeaderRowSelect${n}`).value = selectedIdx;
+    $(`compareHeaderSelectWrap${n}`).style.display = '';
+    
+    checkBothLoaded();
+  }
+}
+
+function checkBothLoaded() {
+  if(S.compare.f1.raw.length&&S.compare.f2.raw.length) {
+    $('compareSettingsSection').style.display='';
+    buildKeyColumnSelect();
+  }
+}
+
+// ════════════════════════════════════════════════
+// COLUMN LIST
+// ════════════════════════════════════════════════
+function buildColList() {
+  const list=$('colList'); list.innerHTML='';
+  S.single.headers.forEach(h => {
+    const t=S.single.types[h];
+    const item=document.createElement('div');
+    item.className='col-item'; item.dataset.col=h;
+    const dispName = S.single.renamed[h]||h;
+    item.innerHTML=`
+      <input type="checkbox" data-col="${esc(h)}" ${S.single.visible.has(h)?'checked':''}
+             onchange="toggleCol(this.dataset.col,this.checked)">
+      <span class="col-name" title="${esc(h)}">${esc(dispName)}</span>
+      <span class="col-type ${t==='num'?'num':t==='date'?'date':''}">${t==='num'?'123':t==='date'?'📅':'ABC'}</span>
+    `;
+    list.appendChild(item);
+  });
+}
+
+function filterColList() {
+  const q=$('colSearch').value.toLowerCase();
+  document.querySelectorAll('#colList .col-item').forEach(i => {
+    i.style.display=i.dataset.col.toLowerCase().includes(q)?'':'none';
+  });
+}
+function toggleCol(col, v) { v?S.single.visible.add(col):S.single.visible.delete(col); renderSingleTable(); }
+function toggleAllCols(v) {
+  S.single.headers.forEach(h=>v?S.single.visible.add(h):S.single.visible.delete(h));
+  document.querySelectorAll('#colList input[type="checkbox"]').forEach(cb=>cb.checked=v);
+  renderSingleTable();
+}
+
+// ════════════════════════════════════════════════
+// ADVANCED FILTERS
+// ════════════════════════════════════════════════
+const OPS = ['içerir','=','≠','>','<','≥','≤','!içerir','boş','dolu','regex'];
+
+function buildFilterList() {
+  const list=$('filterList'); list.innerHTML='';
+  S.single.headers.forEach(h => {
+    const div=document.createElement('div');
+    div.className='filter-item';
+    div.innerHTML=`
+      <label class="filter-label">${esc(S.single.renamed[h]||h)}</label>
+      <div class="filter-row">
+        <select class="adv-op" data-col="${esc(h)}" onchange="updateOp('${h.replace(/'/g,"\\'")}',this.value)">
+          ${OPS.map(o=>`<option value="${o}">${o}</option>`).join('')}
+        </select>
+        <input class="filter-input" type="text" placeholder="değer…"
+               data-col="${esc(h)}"
+               oninput="updateFilter('${h.replace(/'/g,"\\'")}',this.value)">
+      </div>
+    `;
+    list.appendChild(div);
+  });
+}
+
+function updateOp(col, op) {
+  S.single.ops[col]=op;
+  applyAndRender();
+}
+
+function updateFilter(col, val) {
+  if (val.trim()==='') delete S.single.filters[col];
+  else S.single.filters[col]=val.trim();
+  applyAndRender();
+}
+
+function clearAllFilters() {
+  S.single.filters={}; S.single.ops={};
+  document.querySelectorAll('#filterList .filter-input').forEach(i=>i.value='');
+  document.querySelectorAll('#filterList .adv-op').forEach(s=>s.selectedIndex=0);
+  $('tableSearch').value=''; S.single.search='';
+  applyAndRender();
+}
+
+function matchFilter(cellVal, op, filterVal) {
+  const c=String(cellVal??''), fv=filterVal.trim();
+  const cl=c.toLowerCase(), fl=fv.toLowerCase();
+  const cn=Number(c), fn=Number(fv);
+  switch(op||'içerir') {
+    case 'içerir':   return cl.includes(fl);
+    case '=':        return c===fv||(!isNaN(cn)&&!isNaN(fn)&&cn===fn);
+    case '≠':        return c!==fv;
+    case '>':        return !isNaN(cn)&&!isNaN(fn)?cn>fn:c>fv;
+    case '<':        return !isNaN(cn)&&!isNaN(fn)?cn<fn:c<fv;
+    case '≥':        return !isNaN(cn)&&!isNaN(fn)?cn>=fn:c>=fv;
+    case '≤':        return !isNaN(cn)&&!isNaN(fn)?cn<=fn:c<=fv;
+    case '!içerir':  return !cl.includes(fl);
+    case 'boş':      return c.trim()==='';
+    case 'dolu':     return c.trim()!=='';
+    case 'regex':    try { return new RegExp(fv,'i').test(c); } catch{return false;}
+    default: return true;
+  }
+}
+
+// ════════════════════════════════════════════════
+// FILTER & SORT ENGINE
+// ════════════════════════════════════════════════
+function applyAndRender() {
+  S.single.search=$('tableSearch').value.trim().toLowerCase();
+  let data=S.single.raw;
+
+  // Advanced filters
+  const fKeys=Object.keys(S.single.filters);
+  if (fKeys.length) {
+    data=data.filter(row=>fKeys.every(col=>{
+      const op=S.single.ops[col]||'içerir';
+      const fv=S.single.filters[col];
+      if(op==='boş'||op==='dolu') return matchFilter(row[col],op,'');
+      return matchFilter(row[col],op,fv);
+    }));
+  }
+
+  // Global search
+  if (S.single.search) {
+    const q=S.single.search;
+    data=data.filter(row=>Object.values(row).some(v=>String(v??'').toLowerCase().includes(q)));
+  }
+
+  // Sort
+  if (S.single.sortCol) {
+    const col=S.single.sortCol, dir=S.single.sortDir==='asc'?1:-1;
+    data=[...data].sort((a,b)=>{
+      const av=a[col]??'', bv=b[col]??'';
+      if(!isNaN(Number(av))&&!isNaN(Number(bv))) return(Number(av)-Number(bv))*dir;
+      return String(av).localeCompare(String(bv))*dir;
+    });
+  }
+
+  S.single.filtered=data;
+  $('rowCount').innerHTML=`<strong>${data.length.toLocaleString()}</strong> / ${S.single.raw.length.toLocaleString()} satır`;
+  renderSingleTable();
+}
+
+function sortData(col) {
+  if(!col){S.single.sortCol=null;S.single.sortDir='asc';}
+  else if(S.single.sortCol===col) S.single.sortDir=S.single.sortDir==='asc'?'desc':'asc';
+  else{S.single.sortCol=col;S.single.sortDir='asc';}
+  applyAndRender();
+}
+
+// ════════════════════════════════════════════════
+// RENDER SINGLE TABLE
+// ════════════════════════════════════════════════
+const LIMIT=500;
+
+function renderSingleTable() {
+  const cols=S.single.headers.filter(h=>S.single.visible.has(h));
+  const data=S.single.filtered.length||Object.keys(S.single.filters).length||S.single.search
+    ?S.single.filtered:S.single.raw;
+  const q=S.single.search;
+  const sc=S.single.sortCol;
+  const freeze=S.single.freezeCol;
+  const rowH=S.single.rowH;
+
+  // Header
+  $('singleThead').innerHTML='<tr>'+
+    `<th class="${freeze?'frozen-col-head':''}" style="width:50px;text-align:center"><div class="th-inner">#</div></th>`+
+    cols.map((h,i)=>{
+      const disp=S.single.renamed[h]||h;
+      let si=`<span class="sort-icon">↕</span>`;
+      if(sc===h) si=`<span class="sort-icon ${S.single.sortDir}">${S.single.sortDir==='asc'?'↑':'↓'}</span>`;
+      const freezeClass=(freeze&&i===0)?'frozen-col-head':'';
+      return `<th class="${freezeClass}" onclick="sortData('${h.replace(/\\/g,'\\\\').replace(/'/g,"\\'")}')"`+
+             ` ondblclick="startRename('${h.replace(/\\/g,'\\\\').replace(/'/g,"\\'")}',this)">`+
+             `<div class="th-inner">${esc(disp)}${si}</div></th>`;
+    }).join('')+'</tr>';
+
+  // Body
+  const slice=data.slice(0,LIMIT);
+  let html='';
+  slice.forEach((row,i)=>{
+    const dup=S.single.showDups&&S.single.dups.has(i);
+    const rowClass=dup?'':'';
+    html+=`<tr class="${rowClass}" style="height:${rowH}px" onclick="openDetail(${i})" data-idx="${i}">`;
+    html+=`<td class="${freeze?'frozen-col':''}" style="text-align:center;height:${rowH}px">`+
+          `<span style="color:var(--fg-4);font-family:var(--mono);font-size:10px">${i+1}</span>`+
+          (dup?` <span class="dup-badge">DUP</span>`:'')+`</td>`;
+    cols.forEach((h,ci)=>{
+      const val=row[h]??'';
+      const schema=S.single.schema[h]||'text';
+      const schCls=applySchemaClass(val,schema);
+      const freezeClass=(freeze&&ci===0)?'frozen-col':'';
+      html+=`<td class="${freezeClass} ${schCls}" title="${esc(String(val))}" style="height:${rowH}px">${hl(String(val),q)}</td>`;
+    });
+    html+='</tr>';
+  });
+  if(data.length>LIMIT) {
+    html+=`<tr><td colspan="${cols.length+1}" style="text-align:center;padding:13px;color:var(--fg-3);font-family:var(--mono);font-size:10px">
+      … ve <strong>${(data.length-LIMIT).toLocaleString()}</strong> satır daha. Filtre kullanın.
+    </td></tr>`;
+  }
+  $('singleTbody').innerHTML=html;
+}
+
+// ════════════════════════════════════════════════
+// COLUMN RENAME
+// ════════════════════════════════════════════════
+function startRename(col, th) {
+  const disp=S.single.renamed[col]||col;
+  const inner=th.querySelector('.th-inner');
+  const inp=document.createElement('input');
+  inp.className='th-rename'; inp.value=disp;
+  inner.innerHTML=''; inner.appendChild(inp);
+  inp.focus(); inp.select();
+  inp.onblur=()=>finishRename(col,inp.value,th);
+  inp.onkeydown=e=>{if(e.key==='Enter')inp.blur();if(e.key==='Escape'){inp.value=disp;inp.blur();}};
+  inp.onclick=e=>e.stopPropagation();
+}
+
+function finishRename(col, newName, th) {
+  const trimmed=newName.trim();
+  if(trimmed&&trimmed!==col) { S.single.renamed[col]=trimmed; toast(`Sütun yeniden adlandırıldı: ${col} → ${trimmed}`,'info'); }
+  else delete S.single.renamed[col];
+  buildColList(); buildFilterList(); renderSingleTable();
+}
+
+// ════════════════════════════════════════════════
+// ROW DETAIL PANEL
+// ════════════════════════════════════════════════
+let selectedRow=-1;
+function openDetail(idx) {
+  const data=S.single.filtered.length||Object.keys(S.single.filters).length||S.single.search
+    ?S.single.filtered:S.single.raw;
+  const row=data[idx]; if(!row) return;
+  selectedRow=idx;
+  // Highlight row
+  document.querySelectorAll('#singleTbody tr').forEach(tr=>tr.classList.remove('row-selected'));
+  const tr=document.querySelector(`#singleTbody tr[data-idx="${idx}"]`);
+  if(tr) tr.classList.add('row-selected');
+  const body=$('detailBody');
+  body.innerHTML=S.single.headers.map(h=>{
+    const val=row[h]??'';
+    const schema=S.single.schema[h]||'text';
+    const schCls=applySchemaClass(val,schema);
+    return `<div class="detail-row">
+      <div class="detail-key">${esc(S.single.renamed[h]||h)}</div>
+      <div class="detail-val ${schCls}">${esc(String(val))||'<span style="color:var(--fg-4);font-style:italic">boş</span>'}</div>
+    </div>`;
+  }).join('');
+  $('detailPanel').classList.add('open');
+}
+function closeDetail() {
+  $('detailPanel').classList.remove('open');
+  document.querySelectorAll('#singleTbody tr').forEach(tr=>tr.classList.remove('row-selected'));
+  selectedRow=-1;
+}
+
+// ════════════════════════════════════════════════
+// DUPLICATE DETECTION
+// ════════════════════════════════════════════════
+function buildDupColsList() {
+  const list=$('dupColsList'); list.innerHTML='';
+  S.single.headers.forEach(h=>{
+    const div=document.createElement('div'); div.className='dup-col-item';
+    div.innerHTML=`<input type="checkbox" checked data-dup-col="${esc(h)}"><span>${esc(S.single.renamed[h]||h)}</span>`;
+    list.appendChild(div);
+  });
+}
+
+function toggleDuplicates() {
+  const showing=$('dupCols').style.display==='none';
+  $('dupCols').style.display=showing?'':'none';
+  if(!showing){S.single.showDups=false;S.single.dups=new Set();$('dupCount').style.display='none';renderSingleTable();}
+}
+
+function runDuplicates() {
+  const dupCols=[...document.querySelectorAll('#dupColsList [data-dup-col]:checked')].map(i=>i.dataset.dupCol);
+  if(!dupCols.length){toast('En az bir sütun seçin','error');return;}
+  const data=S.single.raw;
+  const seen=new Map();
+  const dups=new Set();
+  data.forEach((row,i)=>{
+    const key=dupCols.map(c=>String(row[c]??'')).join('|__|');
+    if(seen.has(key)){dups.add(i);dups.add(seen.get(key));}
+    else seen.set(key,i);
+  });
+  S.single.dups=dups;
+  S.single.showDups=true;
+  $('dupCountVal').textContent=dups.size;
+  $('dupCount').style.display='';
+  renderSingleTable();
+  toast(`${dups.size} tekrar eden satır bulundu`,'info');
+}
+
+// ════════════════════════════════════════════════
+// FREEZE COLUMN
+// ════════════════════════════════════════════════
+function toggleFreezeCol() {
+  S.single.freezeCol=!S.single.freezeCol;
+  $('freezeBtn').classList.toggle('active',S.single.freezeCol);
+  renderSingleTable();
+  toast(S.single.freezeCol?'İlk sütun donduruldu':'Dondurma kaldırıldı','info');
+}
+
+// ════════════════════════════════════════════════
+// ROW HEIGHT
+// ════════════════════════════════════════════════
+function setRowHeight(v) { S.single.rowH=parseInt(v); renderSingleTable(); }
+
+// ════════════════════════════════════════════════
+// TOOLS
+// ════════════════════════════════════════════════
+function toggleExportMenu() {
+  $('exportDropdown').classList.toggle('open');
+}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.export-wrap')) $('exportDropdown').classList.remove('open');
+});
+
+// ════════════════════════════════════════════════
+// COMPARE
+// ════════════════════════════════════════════════
+function getUniquenessRatio(data, col) {
+  if (!data || data.length === 0) return 0;
+  const vals = new Set();
+  let count = 0;
+  data.forEach(r => {
+    const v = String(r[col] ?? '').trim();
+    if (v !== '') {
+      vals.add(v);
+      count++;
+    }
+  });
+  return count > 0 ? vals.size / count : 0;
+}
+
+function buildKeyColumnSelect() {
+  const sel = $('keyColumnSelect');
+  sel.innerHTML = `
+    <option value="__diff__">Akıllı Eşleştirme (Diff Algoritması)</option>
+    <option value="">Satır sırası ile eşleştir (Basit)</option>
+  `;
+  
+  const f1 = S.compare.f1;
+  const f2 = S.compare.f2;
+  const h1 = new Set(f1.headers);
+  const commonHeaders = f2.headers.filter(h => h1.has(h));
+  
+  let bestKey = '__diff__';
+  let bestScore = -1;
+  
+  commonHeaders.forEach(h => {
+    sel.appendChild(new Option(`Anahtar Sütun: ${h}`, h));
+    
+    // Uniqueness analysis
+    const u1 = getUniquenessRatio(f1.raw, h);
+    const u2 = getUniquenessRatio(f2.raw, h);
+    const uniqueness = Math.min(u1, u2);
+    
+    if (uniqueness > 0.9) {
+      const name = h.toLowerCase();
+      let weight = uniqueness;
+      if (name.includes('id') || name.includes('no') || name.includes('numara') || name.includes('kod') || name.includes('key') || name.includes('kart')) {
+        weight += 0.5;
+      }
+      if (weight > bestScore) {
+        bestScore = weight;
+        bestKey = h;
+      }
+    }
+  });
+  
+  sel.value = bestKey;
+  if (bestKey !== '__diff__') {
+    toast(`Benzersiz anahtar algılandı, otomatik seçildi: ${bestKey}`, 'success');
+  }
+}
+
+function alignRowsLCS(arr1, arr2, keyFn) {
+  const n = arr1.length;
+  const m = arr2.length;
+  
+  const dp = Array.from({ length: n + 1 }, () => new Int16Array(m + 1));
+  
+  for (let i = 1; i <= n; i++) {
+    const k1 = keyFn(arr1[i - 1]);
+    for (let j = 1; j <= m; j++) {
+      if (k1 === keyFn(arr2[j - 1])) {
+        dp[i][j] = dp[i - 1][j - 1] + 1;
+      } else {
+        dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+      }
+    }
+  }
+  
+  let i = n, j = m;
+  const alignment = [];
+  
+  while (i > 0 && j > 0) {
+    if (keyFn(arr1[i - 1]) === keyFn(arr2[j - 1])) {
+      alignment.push({ idx1: i - 1, idx2: j - 1, match: true });
+      i--;
+      j--;
+    } else if (dp[i - 1][j] >= dp[i][j - 1]) {
+      alignment.push({ idx1: i - 1, idx2: null, match: false });
+      i--;
+    } else {
+      alignment.push({ idx1: null, idx2: j - 1, match: false });
+      j--;
+    }
+  }
+  
+  while (i > 0) {
+    alignment.push({ idx1: i - 1, idx2: null, match: false });
+    i--;
+  }
+  while (j > 0) {
+    alignment.push({ idx1: null, idx2: j - 1, match: false });
+    j--;
+  }
+  
+  return alignment.reverse();
+}
+
+function runComparison() {
+  showLoad('Karşılaştırılıyor…');
+  setTimeout(()=>{
+    try {
+      const f1=S.compare.f1, f2=S.compare.f2;
+      const keyCol=$('keyColumnSelect').value;
+      const useFuzzy=$('fuzzyToggle').checked;
+      const allH=[...new Set([...f1.headers,...f2.headers])];
+      const result=[];
+
+      function compareRows(r1, r2) {
+        const changed=new Set(), fuzzyChanged=new Set();
+        allH.forEach(h=>{
+          const v1=String(r1[h]??''), v2=String(r2[h]??'');
+          if(v1!==v2){
+            if(useFuzzy&&fuzzyScore(v1,v2)>0.65&&v1!==''&&v2!=='') fuzzyChanged.add(h);
+            else changed.add(h);
+          }
+        });
+        return {changed,fuzzyChanged};
+      }
+
+      if(keyCol && keyCol !== '__diff__'){
+        const m1=new Map(), m2=new Map();
+        f1.raw.forEach((r,i)=>m1.set(String(r[keyCol]??''),{r,i}));
+        f2.raw.forEach((r,i)=>m2.set(String(r[keyCol]??''),{r,i}));
+        const all=new Set([...m1.keys(),...m2.keys()]);
+        all.forEach(k=>{
+          const e1=m1.get(k), e2=m2.get(k);
+          if(!e1){result.push({type:'added',row:e2.r,changedCells:new Set(),fuzzyCells:new Set()});}
+          else if(!e2){result.push({type:'removed',row:e1.r,changedCells:new Set(),fuzzyCells:new Set()});}
+          else{
+            const {changed,fuzzyChanged}=compareRows(e1.r,e2.r);
+            const merged={}; allH.forEach(h=>{merged[h]=e2.r[h]??e1.r[h]??'';});
+            const type=changed.size?'changed':(fuzzyChanged.size?'fuzzy':'same');
+            result.push({type,row:merged,oldRow:e1.r,changedCells:changed,fuzzyCells:fuzzyChanged});
+          }
+        });
+      } else if (keyCol === '') {
+        const maxLen=Math.max(f1.raw.length,f2.raw.length);
+        for(let i=0;i<maxLen;i++){
+          const r1=f1.raw[i], r2=f2.raw[i];
+          if(!r1){result.push({type:'added',row:r2,changedCells:new Set(),fuzzyCells:new Set()});}
+          else if(!r2){result.push({type:'removed',row:r1,changedCells:new Set(),fuzzyCells:new Set()});}
+          else{
+            const {changed,fuzzyChanged}=compareRows(r1,r2);
+            const merged={}; allH.forEach(h=>{merged[h]=r2[h]??r1[h]??'';});
+            const type=changed.size?'changed':(fuzzyChanged.size?'fuzzy':'same');
+            result.push({type,row:merged,oldRow:r1,changedCells:changed,fuzzyCells:fuzzyChanged});
+          }
+        }
+      } else {
+        // Akıllı Eşleştirme (Diff) - LCS + Fuzzy Pairing
+        if (f1.raw.length * f2.raw.length > 16000000) {
+          toast('Dosya boyutları çok büyük olduğu için basit satır eşleştirme kullanıldı.', 'error');
+          // Fallback to simple matching
+          const maxLen=Math.max(f1.raw.length,f2.raw.length);
+          for(let i=0;i<maxLen;i++){
+            const r1=f1.raw[i], r2=f2.raw[i];
+            if(!r1){result.push({type:'added',row:r2,changedCells:new Set(),fuzzyCells:new Set()});}
+            else if(!r2){result.push({type:'removed',row:r1,changedCells:new Set(),fuzzyCells:new Set()});}
+            else{
+              const {changed,fuzzyChanged}=compareRows(r1,r2);
+              const merged={}; allH.forEach(h=>{merged[h]=r2[h]??r1[h]??'';});
+              const type=changed.size?'changed':(fuzzyChanged.size?'fuzzy':'same');
+              result.push({type,row:merged,oldRow:r1,changedCells:changed,fuzzyCells:fuzzyChanged});
+            }
+          }
+        } else {
+          const alignment = alignRowsLCS(f1.raw, f2.raw, (row) => allH.map(h => String(row[h] ?? '')).join('|__|'));
+          const unmatched1 = [];
+          const unmatched2 = [];
+          
+          alignment.forEach((item, alignIdx) => {
+            if (item.match) return;
+            if (item.idx1 !== null && item.idx2 === null) {
+              unmatched1.push({ alignIdx, row: f1.raw[item.idx1], idx: item.idx1 });
+            } else if (item.idx1 === null && item.idx2 !== null) {
+              unmatched2.push({ alignIdx, row: f2.raw[item.idx2], idx: item.idx2 });
+            }
+          });
+          
+          const paired2 = new Set();
+          
+          unmatched1.forEach(item1 => {
+            let bestMatch = null;
+            let bestScore = -1;
+            
+            unmatched2.forEach(item2 => {
+              if (paired2.has(item2.alignIdx)) return;
+              let matchCount = 0;
+              allH.forEach(h => {
+                if (String(item1.row[h] ?? '') === String(item2.row[h] ?? '')) {
+                  matchCount++;
+                }
+              });
+              const score = matchCount / allH.length;
+              if (score > bestScore) {
+                bestScore = score;
+                bestMatch = item2;
+              }
+            });
+            
+            if (bestScore >= 0.4 && bestMatch) {
+              paired2.add(bestMatch.alignIdx);
+              alignment[item1.alignIdx].idx2 = bestMatch.idx;
+              alignment[item1.alignIdx].isChange = true;
+              alignment[bestMatch.alignIdx].skip = true;
+            }
+          });
+          
+          alignment.forEach(item => {
+            if (item.skip) return;
+            if (item.match) {
+              result.push({
+                type: 'same',
+                row: f2.raw[item.idx2],
+                oldRow: f1.raw[item.idx1],
+                changedCells: new Set(),
+                fuzzyCells: new Set()
+              });
+            } else if (item.isChange) {
+              const r1 = f1.raw[item.idx1];
+              const r2 = f2.raw[item.idx2];
+              const {changed, fuzzyChanged} = compareRows(r1, r2);
+              const merged = {};
+              allH.forEach(h => { merged[h] = r2[h] ?? r1[h] ?? ''; });
+              const type = changed.size ? 'changed' : (fuzzyChanged.size ? 'fuzzy' : 'same');
+              result.push({
+                type,
+                row: merged,
+                oldRow: r1,
+                changedCells: changed,
+                fuzzyCells: fuzzyChanged
+              });
+            } else if (item.idx1 !== null) {
+              result.push({
+                type: 'removed',
+                row: f1.raw[item.idx1],
+                changedCells: new Set(),
+                fuzzyCells: new Set()
+              });
+            } else if (item.idx2 !== null) {
+              result.push({
+                type: 'added',
+                row: f2.raw[item.idx2],
+                changedCells: new Set(),
+                fuzzyCells: new Set()
+              });
+            }
+          });
+        }
+      }
+
+      S.compare.result=result; S.compare.allHeaders=allH; S.compare.filter='all';
+      document.querySelectorAll('.diff-filter-btn').forEach(b=>b.classList.remove('active'));
+      document.querySelector('.diff-filter-btn.all').classList.add('active');
+
+      const c={added:0,removed:0,changed:0,fuzzy:0,same:0};
+      result.forEach(r=>c[r.type]++);
+      $('statTotal').textContent=result.length.toLocaleString();
+      $('statAdded').textContent=c.added.toLocaleString();
+      $('statRemoved').textContent=c.removed.toLocaleString();
+      $('statChanged').textContent=c.changed.toLocaleString();
+      $('statFuzzy').textContent=c.fuzzy.toLocaleString();
+      $('statSame').textContent=c.same.toLocaleString();
+
+      $('compareCard1Name').textContent=f1.name;
+      $('compareCard1Meta').textContent=`${f1.raw.length.toLocaleString()} satır`;
+      $('compareCard2Name').textContent=f2.name;
+      $('compareCard2Meta').textContent=`${f2.raw.length.toLocaleString()} satır`;
+
+      $('compareEmpty').style.display='none';
+      $('compareContent').style.display='flex';
+      const diff=c.added+c.removed+c.changed+c.fuzzy;
+      $('compareTabCount').textContent=diff;
+      if(diff>0) $('compareTabCount').classList.add('visible');
+
+      renderDiffTable();
+      toast(`Tamamlandı → +${c.added}  −${c.removed}  ~${c.changed}  ≈${c.fuzzy}`,'success');
+    } catch(err){toast('Hata: '+err.message,'error');}
+    hideLoad();
+  },50);
+}
+
+function setDiffFilter(f,btn){
+  S.compare.filter=f;
+  document.querySelectorAll('.diff-filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderDiffTable();
+}
+
+function renderDiffTable(){
+  const h=S.compare.allHeaders||[];
+  let data=S.compare.result;
+  if(S.compare.filter!=='all') data=data.filter(r=>r.type===S.compare.filter);
+  $('diffRowCount').innerHTML=`<strong>${data.length.toLocaleString()}</strong> satır`;
+
+  $('diffThead').innerHTML='<tr>'+
+    '<th style="width:80px"><div class="th-inner">Durum</div></th>'+
+    h.map(c=>`<th><div class="th-inner">${esc(c)}</div></th>`).join('')+'</tr>';
+
+  const badges={
+    added:'<span class="diff-row-badge badge-added">+</span>',
+    removed:'<span class="diff-row-badge badge-removed">−</span>',
+    changed:'<span class="diff-row-badge badge-changed">~</span>',
+    fuzzy:'<span class="diff-row-badge badge-fuzzy">≈</span>',
+    same:'<span class="diff-row-badge badge-same">=</span>'
+  };
+  const rowCls={added:'diff-added',removed:'diff-removed',changed:'diff-changed',fuzzy:'diff-changed',same:''};
+
+  const slice=data.slice(0,LIMIT);
+  let html='';
+  slice.forEach(e=>{
+    html+=`<tr class="${rowCls[e.type]}"><td>${badges[e.type]}</td>`;
+    h.forEach(col=>{
+      const val=e.row[col]??'';
+      const old=e.oldRow?(e.oldRow[col]??''):null;
+      let cls='',content=esc(String(val));
+      if(e.type==='added') cls='diff-added-cell';
+      else if(e.type==='removed') cls='diff-removed-cell';
+      else if((e.type==='changed')&&e.changedCells.has(col)){
+        cls='diff-changed-cell';
+        content=`<span style="opacity:0.5;text-decoration:line-through;font-size:10px">${esc(String(old))}</span> → ${esc(String(val))}`;
+      }
+      else if((e.type==='fuzzy')&&e.fuzzyCells.has(col)){
+        cls='diff-fuzzy-cell';
+        const score=Math.round(fuzzyScore(old,val)*100);
+        content=`<span style="opacity:0.5;font-size:10px">${esc(String(old))}</span> ≈${score}% ${esc(String(val))}`;
+      }
+      html+=`<td class="${cls}" title="${esc(String(val))}">${content}</td>`;
+    });
+    html+='</tr>';
+  });
+  if(data.length>LIMIT){
+    html+=`<tr><td colspan="${h.length+1}" style="text-align:center;padding:13px;color:var(--fg-3);font-family:var(--mono);font-size:10px">… ve <strong>${(data.length-LIMIT).toLocaleString()}</strong> satır daha.</td></tr>`;
+  }
+  $('diffTbody').innerHTML=html;
+}
+
+// ════════════════════════════════════════════════
+// ANALIZ TAB
+// ════════════════════════════════════════════════
+function showAnalizSection(sec) {
+  S.analiz.section=sec;
+  const sections=['stats','chart','heatmap','schema','pivot'];
+  sections.forEach(s=>$(`analiz${s.charAt(0).toUpperCase()+s.slice(1)}`).style.display=s===sec?'':'none');
+  $('chartSidebarSection').style.display=sec==='chart'?'':'none';
+  $('pivotSidebarSection').style.display=sec==='pivot'?'':'none';
+  if(!S.single.raw.length){toast('Önce Tekli Görünüm\'e veri yükleyin','error');return;}
+  $('analizEmpty').style.display='none';
+  $('analizContent').style.display='flex';
+  refreshAnaliz();
+}
+
+function refreshAnaliz() {
+  const sec=S.analiz.section;
+  if(sec==='stats') renderColStats();
+  else if(sec==='chart'){renderChart();}
+  else if(sec==='heatmap') renderHeatmap();
+  else if(sec==='schema') renderSchema();
+  else if(sec==='pivot') {/* pivot rendered on demand */}
+}
+
+// ── Column Statistics ─────────────────────────
+function renderColStats() {
+  const data=S.single.raw; const h=S.single.headers;
+  const grid=$('statGrid'); grid.innerHTML='';
+  h.forEach(col=>{
+    const vals=data.map(r=>r[col]??'');
+    const nonempty=vals.filter(v=>String(v).trim()!=='');
+    const nullC=vals.length-nonempty.length;
+    const nullPct=Math.round(nullC/vals.length*100)||0;
+    const nums=nonempty.map(v=>Number(v)).filter(v=>!isNaN(v));
+    const isNum=nums.length>nonempty.length*0.7;
+    const unique=new Set(vals.map(v=>String(v))).size;
+    const type=isNum?'num':colSchema(data,col)==='date'?'date':'text';
+    let statsHtml='';
+    if(isNum&&nums.length) {
+      const mn=Math.min(...nums),mx=Math.max(...nums),avg=nums.reduce((a,b)=>a+b,0)/nums.length;
+      statsHtml=`
+        <div class="sgc-stat"><span class="sgc-stat-label">Min</span><span class="sgc-stat-value">${mn.toLocaleString()}</span></div>
+        <div class="sgc-stat"><span class="sgc-stat-label">Max</span><span class="sgc-stat-value">${mx.toLocaleString()}</span></div>
+        <div class="sgc-stat"><span class="sgc-stat-label">Ort</span><span class="sgc-stat-value">${avg.toFixed(2)}</span></div>
+        <div class="sgc-stat"><span class="sgc-stat-label">Dolu</span><span class="sgc-stat-value">${nonempty.length}</span></div>
+      `;
+    } else {
+      statsHtml=`
+        <div class="sgc-stat"><span class="sgc-stat-label">Dolu</span><span class="sgc-stat-value">${nonempty.length}</span></div>
+        <div class="sgc-stat"><span class="sgc-stat-label">Boş</span><span class="sgc-stat-value">${nullC}</span></div>
+        <div class="sgc-stat"><span class="sgc-stat-label">Tekil</span><span class="sgc-stat-value">${unique}</span></div>
+        <div class="sgc-stat"><span class="sgc-stat-label">Toplam</span><span class="sgc-stat-value">${vals.length}</span></div>
+      `;
+    }
+    const card=document.createElement('div');
+    card.className='stat-grid-card';
+    card.innerHTML=`
+      <div class="sgc-header">
+        <span class="sgc-name" title="${esc(col)}">${esc(S.single.renamed[col]||col)}</span>
+        <span class="sgc-type ${type}">${type}</span>
+      </div>
+      <div class="sgc-stats">${statsHtml}</div>
+      <div class="sgc-null-bar"><div class="sgc-null-fill" style="width:${nullPct}%"></div></div>
+      <div style="font-family:var(--mono);font-size:9px;color:var(--fg-4);margin-top:3px">${nullPct}% boş</div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+// ── Chart ─────────────────────────────────────
+function initChartSelects() {
+  const sel=$('chartColSelect'); sel.innerHTML='';
+  S.single.headers.forEach(h=>sel.appendChild(new Option(S.single.renamed[h]||h,h)));
+  const sel2=$('pivotRowField'); sel2.innerHTML='';
+  const sel3=$('pivotValField'); sel3.innerHTML='';
+  S.single.headers.forEach(h=>{
+    sel2.appendChild(new Option(h,h));
+    sel3.appendChild(new Option(h,h));
+  });
+}
+
+let chartInst=null;
+function renderChart() {
+  if(!S.single.raw.length) return;
+  initChartSelects();
+  const col=$('chartColSelect').value||S.single.headers[0];
+  const type=$('chartTypeSelect').value;
+  const topN=parseInt($('chartTopN').value)||10;
+  const data=S.single.raw;
+  const counts={};
+  data.forEach(r=>{ const v=String(r[col]??''); counts[v]=(counts[v]||0)+1; });
+  const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,topN);
+  const labels=sorted.map(e=>e[0]);
+  const values=sorted.map(e=>e[1]);
+  const isDark=document.documentElement.getAttribute('data-theme')==='dark';
+  const textColor=isDark?'#E8E5DE':'#0F0F0D';
+  const gridColor=isDark?'rgba(200,197,190,0.15)':'rgba(15,15,13,0.1)';
+  const palette=['#FF4D00','#FFE600','#00A86B','#1D4ED8','#7C3AED','#D92D20','#C47C00','#06B6D4','#EC4899','#14B8A6'];
+  const bgColors=labels.map((_,i)=>palette[i%palette.length]);
+
+  if(chartInst){chartInst.destroy();chartInst=null;}
+  const ctx=document.getElementById('mainChart');
+  const cfg={
+    type,
+    data:{labels,datasets:[{label:'Adet',data:values,backgroundColor:bgColors,borderColor:bgColors,borderWidth:2}]},
+    options:{
+      responsive:true,maintainAspectRatio:true,
+      plugins:{legend:{labels:{color:textColor,font:{family:"'Inter',sans-serif",size:11}}},
+               tooltip:{bodyFont:{family:"'JetBrains Mono',monospace"}}},
+      scales: type==='pie'||type==='doughnut'?{}:{
+        x:{ticks:{color:textColor,font:{family:"'JetBrains Mono',monospace",size:10}},grid:{color:gridColor}},
+        y:{ticks:{color:textColor,font:{family:"'JetBrains Mono',monospace",size:10}},grid:{color:gridColor}}
+      }
+    }
+  };
+  chartInst=new Chart(ctx,cfg);
+}
+
+// ── Heatmap ───────────────────────────────────
+function renderHeatmap() {
+  const data=S.single.raw; const h=S.single.headers;
+  // thead
+  $('heatmapThead').innerHTML='<th style="width:50px">#</th>'+h.map(c=>`<th>${esc(S.single.renamed[c]||c)}</th>`).join('');
+  // sample 50 rows
+  const slice=data.slice(0,50);
+  let html='';
+  slice.forEach((row,i)=>{
+    html+=`<tr><td style="color:var(--fg-4);font-family:var(--mono);font-size:10px">${i+1}</td>`;
+    h.forEach(col=>{
+      const v=String(row[col]??'').trim();
+      let cls='hm-full', disp=v.length>12?v.slice(0,12)+'…':v;
+      if(v===''){cls='hm-empty';disp='∅';}
+      else if(v.length<2) cls='hm-partial';
+      html+=`<td class="${cls}">${esc(disp)}</td>`;
+    });
+    html+='</tr>';
+  });
+  if(data.length>50) html+=`<tr><td colspan="${h.length+1}" style="text-align:center;padding:8px;color:var(--fg-3);font-family:var(--mono);font-size:10px">… ilk 50 satır gösteriliyor</td></tr>`;
+  $('heatmapTbody').innerHTML=html;
+}
+
+// ── Schema Detection ──────────────────────────
+function renderSchema() {
+  const data=S.single.raw; const h=S.single.headers;
+  const grid=$('schemaGrid'); grid.innerHTML='';
+  h.forEach(col=>{
+    const schema=colSchema(data,col);
+    const samples=data.slice(0,5).map(r=>String(r[col]??'')).filter(v=>v.trim());
+    const sample=samples[0]||'—';
+    const row=document.createElement('div'); row.className='schema-row';
+    row.innerHTML=`
+      <span class="schema-col-name">${esc(S.single.renamed[col]||col)}</span>
+      <span class="schema-badge ${schema}">${schema}</span>
+      <span class="schema-sample">${esc(sample)}</span>
+    `;
+    grid.appendChild(row);
+  });
+}
+
+// ── Pivot Table ───────────────────────────────
+function renderPivot() {
+  if(!S.single.raw.length){toast('Veri yok','error');return;}
+  const rowF=$('pivotRowField').value;
+  const valF=$('pivotValField').value;
+  const func=$('pivotFunc').value;
+  const data=S.single.raw;
+  const groups={};
+  data.forEach(row=>{
+    const k=String(row[rowF]??'');
+    const v=Number(row[valF]??0);
+    if(!groups[k]) groups[k]=[];
+    groups[k].push(isNaN(v)?0:v);
+  });
+  const rows=Object.entries(groups).sort((a,b)=>String(a[0]).localeCompare(String(b[0])));
+  const aggregate=(arr,fn)=>{
+    if(!arr.length) return 0;
+    if(fn==='count') return arr.length;
+    if(fn==='sum') return arr.reduce((a,b)=>a+b,0);
+    if(fn==='avg') return (arr.reduce((a,b)=>a+b,0)/arr.length).toFixed(2);
+    if(fn==='min') return Math.min(...arr);
+    if(fn==='max') return Math.max(...arr);
+  };
+  const funcLabel={count:'COUNT',sum:'SUM',avg:'AVG',min:'MIN',max:'MAX'};
+  $('pivotThead').innerHTML=`<tr><th>${esc(rowF)}</th><th>${funcLabel[func]}(${esc(valF)})</th></tr>`;
+  $('pivotTbody').innerHTML=rows.map(([k,arr])=>`
+    <tr><td>${esc(k)}</td><td class="pivot-val">${aggregate(arr,func).toLocaleString()}</td></tr>
+  `).join('');
+}
+
+// ════════════════════════════════════════════════
+// EXPORT
+// ════════════════════════════════════════════════
+function exportAs(fmt) {
+  $('exportDropdown').classList.remove('open');
+  const data=S.single.filtered.length||Object.keys(S.single.filters).length||S.single.search
+    ?S.single.filtered:S.single.raw;
+  if(!data.length){toast('Önce bir dosya yükleyin','error');return;}
+  const cols=S.single.headers.filter(h=>S.single.visible.has(h));
+  const out=data.map(row=>{
+    const r={};
+    cols.forEach(h=>{r[S.single.renamed[h]||h]=row[h];});
+    return r;
+  });
+  if(fmt==='xlsx'){
+    const ws=XLSX.utils.json_to_sheet(out);
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,ws,'Export');
+    XLSX.writeFile(wb,'aatools_export.xlsx');
+    toast('Excel indirildi','success');
+  } else if(fmt==='csv'){
+    const hdr=cols.map(h=>S.single.renamed[h]||h);
+    const rows=[hdr.join(','),...out.map(r=>hdr.map(h=>`"${String(r[h]??'').replace(/"/g,'""')}"`).join(','))];
+    const blob=new Blob([rows.join('\n')],{type:'text/csv;charset=utf-8;'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='aatools_export.csv'; a.click();
+    toast('CSV indirildi','success');
+  } else if(fmt==='json'){
+    const blob=new Blob([JSON.stringify(out,null,2)],{type:'application/json'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='aatools_export.json'; a.click();
+    toast('JSON indirildi','success');
+  }
+}
+
+function exportDiff() {
+  const result=S.compare.result;
+  if(!result.length){toast('Önce karşılaştırma yapın','error');return;}
+  const h=S.compare.allHeaders||[];
+  const out=result.map(e=>{
+    const row={__DURUM__:{added:'EKLENDİ',removed:'SİLİNDİ',changed:'DEĞİŞTİ',fuzzy:'BENZİYOR',same:'AYNI'}[e.type]};
+    h.forEach(c=>{row[c]=e.row[c]??'';});
+    if(e.oldRow) h.forEach(c=>{if(e.changedCells?.has(c)||e.fuzzyCells?.has(c)) row[`${c}_ESKİ`]=e.oldRow[c];});
+    return row;
+  });
+  const ws=XLSX.utils.json_to_sheet(out);
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Diff');
+  XLSX.writeFile(wb,'aatools_diff.xlsx');
+  toast('Diff Excel indirildi','success');
+}
+
+// ════════════════════════════════════════════════
+// THEME
+// ════════════════════════════════════════════════
+function applyTheme(dark) {
+  document.documentElement.setAttribute('data-theme',dark?'dark':'light');
+  $('themeIcon').textContent=dark?'☽':'☀';
+  $('themeIcon').style.transform=dark?'rotate(15deg)':'rotate(0deg)';
+  $('themeLabel').textContent=dark?'Gündüz':'Gece';
+  localStorage.setItem('xl-theme',dark?'dark':'light');
+  // Re-render chart with new colors
+  if(chartInst&&S.analiz.section==='chart') setTimeout(renderChart,50);
+}
+function toggleTheme(){applyTheme(document.documentElement.getAttribute('data-theme')!=='dark');}
+(function initTheme(){
+  const saved=localStorage.getItem('xl-theme');
+  if(saved){applyTheme(saved==='dark');return;}
+  applyTheme(window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches);
+})();
+window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change',e=>{
+  if(!localStorage.getItem('xl-theme')) applyTheme(e.matches);
+});
+
+// ════════════════════════════════════════════════
+// KEYBOARD SHORTCUTS
+// ════════════════════════════════════════════════
+function openKbd()  { $('kbdOverlay').classList.add('open'); }
+function closeKbd() { $('kbdOverlay').classList.remove('open'); }
+
+document.addEventListener('keydown', e => {
+  const ctrl=e.ctrlKey||e.metaKey;
+  if(ctrl&&e.key==='f'){e.preventDefault();$('tableSearch').focus();$('tableSearch').select();}
+  if(ctrl&&e.key==='e'){e.preventDefault();toggleExportMenu();}
+  if(ctrl&&e.key==='d'){e.preventDefault();toggleTheme();}
+  if(ctrl&&e.key==='k'){e.preventDefault();openKbd();}
+  if(ctrl&&e.shiftKey&&e.key==='F'){e.preventDefault();toggleFullscreen();}
+  if(e.key==='Escape'){
+    closeDetail();
+    $('exportDropdown').classList.remove('open');
+    $('kbdOverlay').classList.remove('open');
+    if(document.activeElement===$('tableSearch')){$('tableSearch').value='';S.single.search='';applyAndRender();}
+  }
+});
+
+// ════════════════════════════════════════════════
+// FULLSCREEN
+// ════════════════════════════════════════════════
+function toggleFullscreen() {
+  const el=$('contentArea');
+  if(!document.fullscreenElement){
+    (el.requestFullscreen||el.webkitRequestFullscreen||el.mozRequestFullScreen).call(el);
+  } else {
+    (document.exitFullscreen||document.webkitExitFullscreen||document.mozCancelFullScreen).call(document);
+  }
+}
+
+// ════════════════════════════════════════════════
+// TOOLTIP
+// ════════════════════════════════════════════════
+const tooltip=$('cellTooltip');
+document.addEventListener('mouseover',e=>{
+  const td=e.target.closest('td');
+  if(td&&td.title&&td.title.length>36){tooltip.textContent=td.title;tooltip.classList.add('visible');}
+});
+document.addEventListener('mouseout',e=>{if(e.target.closest('td'))tooltip.classList.remove('visible');});
+document.addEventListener('mousemove',e=>{tooltip.style.left=(e.clientX+14)+'px';tooltip.style.top=(e.clientY+14)+'px';});
+</script>
+</body>
+</html>

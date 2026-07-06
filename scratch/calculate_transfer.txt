@@ -1,0 +1,509 @@
+Disassembly of <code object calculate_transfer at 0x000001FB868564C0, file "main.py", line 544>:
+544           0 RESUME                   0
+
+546           2 LOAD_FAST                0 (self)
+              4 LOAD_ATTR                0 (hat_list)
+             14 LOAD_METHOD              1 (selectedItems)
+             36 PRECALL                  0
+             40 CALL                     0
+             50 STORE_FAST               1 (sel_primary)
+
+547          52 LOAD_FAST                0 (self)
+             54 LOAD_ATTR                2 (transfer_hat_list)
+             64 LOAD_METHOD              1 (selectedItems)
+             86 PRECALL                  0
+             90 CALL                     0
+            100 STORE_FAST               2 (sel_transfer)
+
+548         102 LOAD_FAST                1 (sel_primary)
+            104 POP_JUMP_FORWARD_IF_TRUE    23 (to 152)
+
+549         106 LOAD_FAST                0 (self)
+            108 LOAD_METHOD              3 (log_msg)
+            130 LOAD_CONST               1 ('İlk biniş HatNo seçili değil; Aktarma Hesapla için önce bir Hat seçin.')
+            132 PRECALL                  1
+            136 CALL                     1
+            146 POP_TOP
+
+550         148 LOAD_CONST               0 (None)
+            150 RETURN_VALUE
+
+551     >>  152 LOAD_FAST                2 (sel_transfer)
+            154 POP_JUMP_FORWARD_IF_TRUE    23 (to 202)
+
+552         156 LOAD_FAST                0 (self)
+            158 LOAD_METHOD              3 (log_msg)
+            180 LOAD_CONST               2 ('Aktarma HatNo seçili değil; Aktarma Hesapla için bir Aktarma HatNo seçin.')
+            182 PRECALL                  1
+            186 CALL                     1
+            196 POP_TOP
+
+553         198 LOAD_CONST               0 (None)
+            200 RETURN_VALUE
+
+554     >>  202 LOAD_GLOBAL              9 (NULL + hasattr)
+            214 LOAD_FAST                0 (self)
+            216 LOAD_CONST               3 ('analyzed')
+            218 PRECALL                  2
+            222 CALL                     2
+            232 POP_JUMP_FORWARD_IF_TRUE    74 (to 382)
+
+555         234 NOP
+
+556         236 LOAD_GLOBAL             10 (QtWidgets)
+            248 LOAD_ATTR                6 (QMessageBox)
+            258 LOAD_METHOD              7 (information)
+            280 LOAD_FAST                0 (self)
+            282 LOAD_CONST               4 ('Bilgi')
+            284 LOAD_CONST               5 ('Önce DB Analiz Et yapmalısınız!')
+            286 PRECALL                  3
+            290 CALL                     3
+            300 POP_TOP
+            302 JUMP_FORWARD            16 (to 336)
+        >>  304 PUSH_EXC_INFO
+
+557         306 LOAD_GLOBAL             16 (Exception)
+            318 CHECK_EXC_MATCH
+            320 POP_JUMP_FORWARD_IF_FALSE     3 (to 328)
+            322 POP_TOP
+
+558         324 POP_EXCEPT
+            326 JUMP_FORWARD             4 (to 336)
+
+557     >>  328 RERAISE                  0
+        >>  330 COPY                     3
+            332 POP_EXCEPT
+            334 RERAISE                  1
+
+559     >>  336 LOAD_FAST                0 (self)
+            338 LOAD_METHOD              3 (log_msg)
+            360 LOAD_CONST               6 ('Analiz yapılmamış. Aktarma Hesapla kullanılamaz.')
+            362 PRECALL                  1
+            366 CALL                     1
+            376 POP_TOP
+
+560         378 LOAD_CONST               0 (None)
+            380 RETURN_VALUE
+
+562     >>  382 LOAD_FAST                1 (sel_primary)
+            384 LOAD_CONST               7 (0)
+            386 BINARY_SUBSCR
+            396 LOAD_METHOD              9 (data)
+            418 LOAD_GLOBAL             20 (QtCore)
+            430 LOAD_ATTR               11 (Qt)
+            440 LOAD_ATTR               12 (UserRole)
+            450 PRECALL                  1
+            454 CALL                     1
+            464 STORE_FAST               3 (hatno_primary)
+
+563         466 LOAD_FAST                2 (sel_transfer)
+            468 LOAD_CONST               7 (0)
+            470 BINARY_SUBSCR
+            480 LOAD_METHOD              9 (data)
+            502 LOAD_GLOBAL             20 (QtCore)
+            514 LOAD_ATTR               11 (Qt)
+            524 LOAD_ATTR               12 (UserRole)
+            534 PRECALL                  1
+            538 CALL                     1
+            548 STORE_FAST               4 (hatno_transfer)
+
+564         550 LOAD_FAST                0 (self)
+            552 LOAD_ATTR               13 (datetime_edit)
+            562 LOAD_METHOD             14 (dateTime)
+            584 PRECALL                  0
+            588 CALL                     0
+            598 STORE_FAST               5 (dt_board)
+
+565         600 LOAD_FAST                0 (self)
+            602 LOAD_ATTR               15 (transfer_datetime_edit)
+            612 LOAD_METHOD             14 (dateTime)
+            634 PRECALL                  0
+            638 CALL                     0
+            648 STORE_FAST               6 (dt_transfer)
+
+567         650 LOAD_FAST                0 (self)
+            652 LOAD_ATTR               16 (transfer_order_combo)
+            662 LOAD_METHOD             17 (currentIndex)
+            684 PRECALL                  0
+            688 CALL                     0
+            698 LOAD_CONST               7 (0)
+            700 COMPARE_OP               2 (==)
+            706 POP_JUMP_FORWARD_IF_FALSE     2 (to 712)
+            708 LOAD_CONST               8 (1)
+            710 JUMP_FORWARD             1 (to 714)
+        >>  712 LOAD_CONST               9 (2)
+        >>  714 STORE_FAST               7 (selected_order)
+
+569         716 LOAD_FAST                0 (self)
+            718 LOAD_METHOD              3 (log_msg)
+            740 LOAD_CONST              10 ('Aktarma hesaplama başlatılıyor: İlkHat=')
+            742 LOAD_FAST                3 (hatno_primary)
+            744 FORMAT_VALUE             0
+            746 LOAD_CONST              11 (', AktarmaHat=')
+            748 LOAD_FAST                4 (hatno_transfer)
+            750 FORMAT_VALUE             0
+            752 LOAD_CONST              12 (', Biniş=')
+            754 LOAD_FAST                5 (dt_board)
+            756 LOAD_METHOD             18 (toString)
+            778 LOAD_GLOBAL             20 (QtCore)
+            790 LOAD_ATTR               11 (Qt)
+            800 LOAD_ATTR               19 (ISODate)
+            810 PRECALL                  1
+            814 CALL                     1
+            824 FORMAT_VALUE             0
+            826 LOAD_CONST              13 (', Aktarma Biniş=')
+            828 LOAD_FAST                6 (dt_transfer)
+            830 LOAD_METHOD             18 (toString)
+            852 LOAD_GLOBAL             20 (QtCore)
+            864 LOAD_ATTR               11 (Qt)
+            874 LOAD_ATTR               19 (ISODate)
+            884 PRECALL                  1
+            888 CALL                     1
+            898 FORMAT_VALUE             0
+            900 LOAD_CONST              14 (', Sıra=')
+            902 LOAD_FAST                7 (selected_order)
+            904 FORMAT_VALUE             0
+            906 BUILD_STRING            10
+            908 PRECALL                  1
+            912 CALL                     1
+            922 POP_TOP
+
+571         924 NOP
+
+573         926 LOAD_FAST                0 (self)
+            928 LOAD_ATTR               20 (lines_db)
+            938 POP_JUMP_FORWARD_IF_FALSE     7 (to 954)
+            940 LOAD_FAST                0 (self)
+            942 LOAD_ATTR               21 (fares_db)
+            952 POP_JUMP_FORWARD_IF_TRUE    23 (to 1000)
+
+574     >>  954 LOAD_FAST                0 (self)
+            956 LOAD_METHOD              3 (log_msg)
+            978 LOAD_CONST              15 ('Lines veya Fares DB seçili değil.')
+            980 PRECALL                  1
+            984 CALL                     1
+            994 POP_TOP
+
+575         996 LOAD_CONST               0 (None)
+            998 RETURN_VALUE
+
+578     >> 1000 LOAD_GLOBAL             45 (NULL + sqlite3)
+           1012 LOAD_ATTR               23 (connect)
+           1022 LOAD_FAST                0 (self)
+           1024 LOAD_ATTR               20 (lines_db)
+           1034 PRECALL                  1
+           1038 CALL                     1
+           1048 STORE_FAST               8 (connL)
+
+579        1050 LOAD_FAST                8 (connL)
+           1052 LOAD_METHOD             24 (cursor)
+           1074 PRECALL                  0
+           1078 CALL                     0
+           1088 STORE_FAST               9 (curL)
+
+581        1090 LOAD_FAST                9 (curL)
+           1092 LOAD_METHOD             25 (execute)
+           1114 LOAD_CONST              16 ('SELECT zone_id FROM lines WHERE line_id = ? LIMIT 1')
+           1116 LOAD_FAST                3 (hatno_primary)
+           1118 BUILD_TUPLE              1
+           1120 PRECALL                  2
+           1124 CALL                     2
+           1134 POP_TOP
+
+582        1136 LOAD_FAST                9 (curL)
+           1138 LOAD_METHOD             26 (fetchone)
+           1160 PRECALL                  0
+           1164 CALL                     0
+           1174 STORE_FAST              10 (r)
+
+583        1176 LOAD_FAST               10 (r)
+           1178 POP_JUMP_FORWARD_IF_FALSE     8 (to 1196)
+           1180 LOAD_FAST               10 (r)
+           1182 LOAD_CONST               7 (0)
+           1184 BINARY_SUBSCR
+           1194 POP_JUMP_FORWARD_IF_NOT_NONE    43 (to 1282)
+
+584     >> 1196 LOAD_FAST                9 (curL)
+           1198 LOAD_METHOD             25 (execute)
+           1220 LOAD_CONST              17 ('SELECT zoneId FROM lines WHERE lineId = ? LIMIT 1')
+           1222 LOAD_FAST                3 (hatno_primary)
+           1224 BUILD_TUPLE              1
+           1226 PRECALL                  2
+           1230 CALL                     2
+           1240 POP_TOP
+
+585        1242 LOAD_FAST                9 (curL)
+           1244 LOAD_METHOD             26 (fetchone)
+           1266 PRECALL                  0
+           1270 CALL                     0
+           1280 STORE_FAST              10 (r)
+
+586     >> 1282 LOAD_FAST               10 (r)
+           1284 POP_JUMP_FORWARD_IF_FALSE    16 (to 1318)
+           1286 LOAD_FAST               10 (r)
+           1288 LOAD_CONST               7 (0)
+           1290 BINARY_SUBSCR
+           1300 POP_JUMP_FORWARD_IF_NONE     8 (to 1318)
+           1302 LOAD_FAST               10 (r)
+           1304 LOAD_CONST               7 (0)
+           1306 BINARY_SUBSCR
+           1316 JUMP_FORWARD             1 (to 1320)
+        >> 1318 LOAD_CONST               0 (None)
+        >> 1320 STORE_FAST              11 (zone_id_primary)
+
+588        1322 LOAD_FAST                9 (curL)
+           1324 LOAD_METHOD             25 (execute)
+           1346 LOAD_CONST              16 ('SELECT zone_id FROM lines WHERE line_id = ? LIMIT 1')
+           1348 LOAD_FAST                4 (hatno_transfer)
+           1350 BUILD_TUPLE              1
+           1352 PRECALL                  2
+           1356 CALL                     2
+           1366 POP_TOP
+
+589        1368 LOAD_FAST                9 (curL)
+           1370 LOAD_METHOD             26 (fetchone)
+           1392 PRECALL                  0
+           1396 CALL                     0
+           1406 STORE_FAST              10 (r)
+
+590        1408 LOAD_FAST               10 (r)
+           1410 POP_JUMP_FORWARD_IF_FALSE     8 (to 1428)
+           1412 LOAD_FAST               10 (r)
+           1414 LOAD_CONST               7 (0)
+           1416 BINARY_SUBSCR
+           1426 POP_JUMP_FORWARD_IF_NOT_NONE    43 (to 1514)
+
+591     >> 1428 LOAD_FAST                9 (curL)
+           1430 LOAD_METHOD             25 (execute)
+           1452 LOAD_CONST              17 ('SELECT zoneId FROM lines WHERE lineId = ? LIMIT 1')
+           1454 LOAD_FAST                4 (hatno_transfer)
+           1456 BUILD_TUPLE              1
+           1458 PRECALL                  2
+           1462 CALL                     2
+           1472 POP_TOP
+
+592        1474 LOAD_FAST                9 (curL)
+           1476 LOAD_METHOD             26 (fetchone)
+           1498 PRECALL                  0
+           1502 CALL                     0
+           1512 STORE_FAST              10 (r)
+
+593     >> 1514 LOAD_FAST               10 (r)
+           1516 POP_JUMP_FORWARD_IF_FALSE    16 (to 1550)
+           1518 LOAD_FAST               10 (r)
+           1520 LOAD_CONST               7 (0)
+           1522 BINARY_SUBSCR
+           1532 POP_JUMP_FORWARD_IF_NONE     8 (to 1550)
+           1534 LOAD_FAST               10 (r)
+           1536 LOAD_CONST               7 (0)
+           1538 BINARY_SUBSCR
+           1548 JUMP_FORWARD             1 (to 1552)
+        >> 1550 LOAD_CONST               0 (None)
+        >> 1552 STORE_FAST              12 (zone_id_transfer)
+
+595        1554 LOAD_FAST                8 (connL)
+           1556 LOAD_METHOD             27 (close)
+           1578 PRECALL                  0
+           1582 CALL                     0
+           1592 POP_TOP
+
+597        1594 LOAD_FAST               11 (zone_id_primary)
+           1596 POP_JUMP_FORWARD_IF_NONE     2 (to 1602)
+           1598 LOAD_FAST               12 (zone_id_transfer)
+           1600 POP_JUMP_FORWARD_IF_NOT_NONE    35 (to 1672)
+
+598     >> 1602 LOAD_GLOBAL             10 (QtWidgets)
+           1614 LOAD_ATTR                6 (QMessageBox)
+           1624 LOAD_METHOD             28 (warning)
+           1646 LOAD_FAST                0 (self)
+           1648 LOAD_CONST              18 ('Hata')
+           1650 LOAD_CONST              19 ("Zone ID'ler bulunamadı.")
+           1652 PRECALL                  3
+           1656 CALL                     3
+           1666 POP_TOP
+
+599        1668 LOAD_CONST               0 (None)
+           1670 RETURN_VALUE
+
+602     >> 1672 LOAD_GLOBAL             45 (NULL + sqlite3)
+           1684 LOAD_ATTR               23 (connect)
+           1694 LOAD_FAST                0 (self)
+           1696 LOAD_ATTR               21 (fares_db)
+           1706 PRECALL                  1
+           1710 CALL                     1
+           1720 STORE_FAST              13 (connF)
+
+603        1722 LOAD_FAST               13 (connF)
+           1724 LOAD_METHOD             24 (cursor)
+           1746 PRECALL                  0
+           1750 CALL                     0
+           1760 STORE_FAST              14 (curF)
+
+604        1762 LOAD_FAST               14 (curF)
+           1764 LOAD_METHOD             25 (execute)
+           1786 LOAD_CONST              20 ('SELECT discount_type FROM transfers_according_to_previous_line WHERE previous_line_id = ? AND line_id = ? LIMIT 1')
+
+605        1788 LOAD_FAST               11 (zone_id_primary)
+           1790 LOAD_FAST               12 (zone_id_transfer)
+           1792 BUILD_TUPLE              2
+
+604        1794 PRECALL                  2
+           1798 CALL                     2
+           1808 POP_TOP
+
+606        1810 LOAD_FAST               14 (curF)
+           1812 LOAD_METHOD             26 (fetchone)
+           1834 PRECALL                  0
+           1838 CALL                     0
+           1848 STORE_FAST              15 (transfer_row)
+
+607        1850 LOAD_FAST               13 (connF)
+           1852 LOAD_METHOD             27 (close)
+           1874 PRECALL                  0
+           1878 CALL                     0
+           1888 POP_TOP
+
+609        1890 LOAD_FAST               15 (transfer_row)
+           1892 POP_JUMP_FORWARD_IF_TRUE    35 (to 1964)
+
+610        1894 LOAD_GLOBAL             10 (QtWidgets)
+           1906 LOAD_ATTR                6 (QMessageBox)
+           1916 LOAD_METHOD             28 (warning)
+           1938 LOAD_FAST                0 (self)
+           1940 LOAD_CONST              21 ('Aktarma Yok')
+           1942 LOAD_CONST              22 ('Hatlar arasında aktarma yoktur!')
+           1944 PRECALL                  3
+           1948 CALL                     3
+           1958 POP_TOP
+
+611        1960 LOAD_CONST               0 (None)
+           1962 RETURN_VALUE
+
+613     >> 1964 LOAD_FAST               15 (transfer_row)
+           1966 LOAD_CONST               7 (0)
+           1968 BINARY_SUBSCR
+           1978 STORE_FAST              16 (discount_type)
+
+616        1980 LOAD_FAST               16 (discount_type)
+           1982 POP_JUMP_FORWARD_IF_NOT_NONE    26 (to 2036)
+
+618        1984 LOAD_FAST                0 (self)
+           1986 LOAD_METHOD             29 (compute_complementary_transfer)
+           2008 LOAD_FAST                3 (hatno_primary)
+           2010 LOAD_FAST                4 (hatno_transfer)
+           2012 LOAD_FAST                5 (dt_board)
+           2014 LOAD_FAST                6 (dt_transfer)
+           2016 LOAD_FAST                7 (selected_order)
+           2018 PRECALL                  5
+           2022 CALL                     5
+           2032 STORE_FAST              17 (result)
+           2034 JUMP_FORWARD            70 (to 2176)
+
+619     >> 2036 LOAD_FAST               16 (discount_type)
+           2038 LOAD_CONST              23 ('4')
+           2040 COMPARE_OP               2 (==)
+           2046 POP_JUMP_FORWARD_IF_FALSE    26 (to 2100)
+
+621        2048 LOAD_FAST                0 (self)
+           2050 LOAD_METHOD             30 (compute_transfer)
+           2072 LOAD_FAST                3 (hatno_primary)
+           2074 LOAD_FAST                4 (hatno_transfer)
+           2076 LOAD_FAST                5 (dt_board)
+           2078 LOAD_FAST                6 (dt_transfer)
+           2080 LOAD_FAST                7 (selected_order)
+           2082 PRECALL                  5
+           2086 CALL                     5
+           2096 STORE_FAST              17 (result)
+           2098 JUMP_FORWARD            38 (to 2176)
+
+623     >> 2100 LOAD_GLOBAL             10 (QtWidgets)
+           2112 LOAD_ATTR                6 (QMessageBox)
+           2122 LOAD_METHOD             28 (warning)
+           2144 LOAD_FAST                0 (self)
+           2146 LOAD_CONST              18 ('Hata')
+           2148 LOAD_CONST              24 ('Bilinmeyen discount_type değeri: ')
+           2150 LOAD_FAST               16 (discount_type)
+           2152 FORMAT_VALUE             0
+           2154 BUILD_STRING             2
+           2156 PRECALL                  3
+           2160 CALL                     3
+           2170 POP_TOP
+
+624        2172 LOAD_CONST               0 (None)
+           2174 RETURN_VALUE
+
+626     >> 2176 LOAD_FAST               17 (result)
+           2178 POP_JUMP_FORWARD_IF_NOT_NONE     2 (to 2184)
+
+628        2180 LOAD_CONST               0 (None)
+           2182 RETURN_VALUE
+
+630     >> 2184 LOAD_FAST                0 (self)
+           2186 LOAD_METHOD              3 (log_msg)
+           2208 LOAD_CONST              25 ('Aktarma hesaplama sonucu:\n')
+           2210 LOAD_FAST               17 (result)
+           2212 FORMAT_VALUE             0
+           2214 BUILD_STRING             2
+           2216 PRECALL                  1
+           2220 CALL                     1
+           2230 POP_TOP
+           2232 LOAD_CONST               0 (None)
+           2234 RETURN_VALUE
+        >> 2236 PUSH_EXC_INFO
+
+631        2238 LOAD_GLOBAL             16 (Exception)
+           2250 CHECK_EXC_MATCH
+           2252 POP_JUMP_FORWARD_IF_FALSE    71 (to 2396)
+           2254 STORE_FAST              18 (e)
+
+632        2256 LOAD_FAST                0 (self)
+           2258 LOAD_METHOD              3 (log_msg)
+           2280 LOAD_CONST              26 ('Aktarma hesaplama sırasında hata: ')
+           2282 LOAD_FAST               18 (e)
+           2284 FORMAT_VALUE             0
+           2286 BUILD_STRING             2
+           2288 PRECALL                  1
+           2292 CALL                     1
+           2302 POP_TOP
+
+633        2304 LOAD_GLOBAL             10 (QtWidgets)
+           2316 LOAD_ATTR                6 (QMessageBox)
+           2326 LOAD_METHOD             28 (warning)
+           2348 LOAD_FAST                0 (self)
+           2350 LOAD_CONST              18 ('Hata')
+           2352 LOAD_CONST              27 ('Aktarma hesaplama sırasında hata oluştu:\n')
+           2354 LOAD_FAST               18 (e)
+           2356 FORMAT_VALUE             0
+           2358 BUILD_STRING             2
+           2360 PRECALL                  3
+           2364 CALL                     3
+           2374 POP_TOP
+           2376 POP_EXCEPT
+           2378 LOAD_CONST               0 (None)
+           2380 STORE_FAST              18 (e)
+           2382 DELETE_FAST             18 (e)
+           2384 LOAD_CONST               0 (None)
+           2386 RETURN_VALUE
+        >> 2388 LOAD_CONST               0 (None)
+           2390 STORE_FAST              18 (e)
+           2392 DELETE_FAST             18 (e)
+           2394 RERAISE                  1
+
+631     >> 2396 RERAISE                  0
+        >> 2398 COPY                     3
+           2400 POP_EXCEPT
+           2402 RERAISE                  1
+ExceptionTable:
+  236 to 300 -> 304 [0]
+  304 to 322 -> 330 [1] lasti
+  328 to 328 -> 330 [1] lasti
+  926 to 994 -> 2236 [0]
+  1000 to 1666 -> 2236 [0]
+  1672 to 1958 -> 2236 [0]
+  1964 to 2170 -> 2236 [0]
+  2176 to 2178 -> 2236 [0]
+  2184 to 2230 -> 2236 [0]
+  2236 to 2254 -> 2398 [1] lasti
+  2256 to 2374 -> 2388 [1] lasti
+  2388 to 2396 -> 2398 [1] lasti
+

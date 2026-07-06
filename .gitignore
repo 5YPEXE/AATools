@@ -1,0 +1,29 @@
+# Veritabanı ve Şirket İçi Veriler
+*.sqlite
+*.csv
+
+# Dependencies
+node_modules/
+.npm/
+
+# Build ve Log dosyaları
+dist/
+build/
+*.log
+
+# Ortam Değişkenleri
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# IDE ve OS Dosyaları
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Scratch / Analiz Betikleri (İsteğe bağlı)
+# scratch_*.js
+# analyze_*.js
