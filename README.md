@@ -2,8 +2,6 @@
 
 AATools, veritabanı analizleri, coğrafi harita görüntüleme, ofis operasyonları ve dosya yönetimi gibi süreçleri tek bir merkezden yönetmek için geliştirilmiş kapsamlı bir ofis aracı platformudur.
 
-![AATools Dashboard](client/public/aatools-bg.png) <!-- Opsiyonel: Proje ekran görüntüsü varsa eklenebilir -->
-
 ## Özellikler (Modüller)
 
 AATools, farklı alanlardaki ihtiyaçları karşılamak üzere çeşitli modüllere ayrılmıştır:
@@ -53,7 +51,3 @@ npm run dev
 ```
 
 Uygulama `http://localhost:5173` (veya Vite'in sağladığı port) üzerinden ayağa kalkacaktır.
-
-## Lisans ve Telif Hakkı
-
-Bu yazılım şirket içi araç olarak tasarlanmıştır. İçerisinde hassas veya gizli veritabanı dosyaları (Örn: `lines_*.sqlite`, `fares_*.sqlite`) paylaşılmamalıdır.
